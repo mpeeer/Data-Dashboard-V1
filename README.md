@@ -62,32 +62,27 @@ Limits: **50 MB** file size cap, column type detection ≥ 70 % of values match 
 
 ## 🌐 Deploy to GitHub Pages
 
-This repo ships with `.github/workflows/deploy.yml`. Push to `main` and the dashboard is live at:
+This repo ships with `.github/workflows/deploy.yml` and a `public/.nojekyll` marker (so GitHub Pages skips its default Jekyll processing of `_`-prefixed paths). Push to `main` and the dashboard is live at:
 
 ```
-https://<owner>.github.io/Data-Dashboard-V1/
+https://<owner>.github.io/<repo-name>/
 ```
 
-If your repo is called something else, update `package.json`:
+The action runs `npm run build` (Vite emits assets with relative `./assets/...` paths because of `base: './'` in `vite.config.ts`), uploads `dist/`, and Pages serves it. Rename the repo to anything and the same build keeps working — no path tweak needed.
 
-```jsonc
-// change this line to match your repo name
-"build:gh": "tsc -b && vite build --base=/YOUR-REPO-NAME/"
-```
-
-To enable Pages for the first time:
+### One-time setup
 
 1. Repo → **Settings → Pages**
 2. Source: **GitHub Actions**
 3. Push to `main`
 
-That’s it — every commit rebuilds and redeploys.
+That’s it — every commit rebuilds and redeploys. The dashboard URL is shown at the bottom of the workflow run and on the repo home page.
 
-### Running the build locally under a subpath
+### Running the Pages build locally
 
 ```bash
-npm run build:gh
-npm run serve
+npm run build      # static dist/ ready for any URL
+npm run serve      # serve dist/ on http://localhost:4173
 ```
 
 ---
@@ -224,7 +219,9 @@ sample-data.csv                      # 60 rows of sales data
 
 ## 📜 License
 
-This project ships **without a license file** so all rights remain with you by default. If you want to open-source it, drop an MIT `LICENSE` file in the root and push — done.
+[MIT](./LICENSE) — Copyright (c) 2026 Jeremy. Do what you want, just keep the copyright notice.
+
+Edit the holder name on the first line of `LICENSE` if you'd like to claim it under a different name.
 
 ---
 

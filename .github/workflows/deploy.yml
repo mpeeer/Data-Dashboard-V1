@@ -31,11 +31,12 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      # The repo is `Data-Dashboard-V1`, so the site lives at
-      # https://<owner>.github.io/Data-Dashboard-V1/. The `build:gh` script
-      # tells Vite to emit relative-to-root asset URLs.
-      - name: Build for Pages
-        run: npm run build:gh
+      # vite.config.ts uses `base: './'`, so built assets are emitted with
+      # relative `./assets/...` paths. That makes the same bundle work under
+      # any Pages URL — whether the repo is renamed or moved to a Project Pages
+      # site with a custom domain. No `--base=/repo-name/` override required.
+      - name: Build
+        run: npm run build
 
       - name: Configure Pages
         uses: actions/configure-pages@v4

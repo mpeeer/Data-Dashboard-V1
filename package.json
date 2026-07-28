@@ -3,10 +3,10 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:gh": "tsc -b && vite build --base=/Data-Dashboard-V1/",
     "preview": "vite preview",
     "serve": "vite preview --host --port 4173",
     "typecheck": "tsc -b --noEmit"
