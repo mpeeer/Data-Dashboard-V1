@@ -3,7 +3,7 @@
   <img src="public/icon.svg" alt="Lumen logo" width="80" height="80" />
 </p>
 
-<h1 align="center">Lumen — Data Dashboard</h1>
+<h1 align="center">Lumen — Minimal Data Dashboard</h1>
 
 <p align="center">
   <strong>Instant, client-side data exploration.</strong><br />
@@ -27,12 +27,10 @@
 - [Quick Start](#quick-start)
 - [Supported File Formats](#supported-file-formats)
 - [How It Works](#how-it-works)
-- [Export](#export)
 - [Theming](#theming)
 - [Deployment](#deployment)
   - [GitHub Pages](#github-pages)
   - [Desktop App (PWA)](#desktop-app-pwa)
-  - [Native Binary (Tauri)](#native-binary-tauri)
 - [Project Structure](#project-structure)
 - [Technology Stack](#technology-stack)
 - [Development](#development)
@@ -68,40 +66,21 @@ The dashboard automatically renders up to 5 histograms, 3 category breakdowns, 1
 ### Interactive Exploration
 - **Data Outline sidebar** — lists every column with its type, unique count, mean, range, and sample values.
 - **Focus Mode** — click any column to filter all charts and statistics to that column.
-- **Scrollable Data Preview** — the first 50 rows formatted as a paginated table.
-
-### Statistical Insights Engine
-A built-in, deterministic insight engine analyzes every dataset and produces factual observations, including:
-
-- Per-column summary statistics.
-- Top-5 category distributions with percentages.
-- **Pearson correlation** coefficients between numeric column pairs (reported for |r| ≥ 0.5).
-- Date-range spans and trend direction with percentage change.
-- Row-level extremes (highest and lowest values per numeric column).
-
-All insights are computed locally — no AI models, no external API calls.
-
-### Export
-Generate **PDF reports** directly from the dashboard:
-
-- **Report PDF** — a written findings document with embedded charts.
-- **Charts PDF** — a visual-only export of every rendered chart.
-
-Both outputs are generated client-side using `pdf-lib` and the Chart.js offscreen renderer. No data ever leaves your machine.
+- **Dataset Search** — search across every value in every column with instant results and highlighted matches in the data table.
+- **Fullscreen Charts** — expand any chart with the ↗ button for zoom (scroll) and pan (drag) via Chart.js zoom plugin.
+- **Scrollable Data Preview** — the first 50 rows with search match highlighting.
 
 ### Theming
-Four preset color themes plus a **custom accent picker**:
+Four preset color themes plus **Auto** and **custom accent**:
 
-- `lumen` (default) — cool blue / green / amber.
-- `graphite` — neutral grayscale.
-- `paper` — light-mode with crisp contrast.
-- `ember` — warm orange / red / yellow.
-- **Custom** — choose any accent color via a color input; the full 6-color palette is derived automatically.
+- **Midnight** (default) — dark blue / green / amber.
+- **Graphite** — muted grayscale with subtle color accents.
+- **Paper** — light-mode with crisp contrast.
+- **Ember** — warm orange / red / yellow.
+- **Auto** — follows your OS light/dark preference automatically.
+- **Custom** — choose any accent color; a full light or dark surface is derived from the accent's luminance.
 
-Theme preference is persisted in `localStorage` per browser.
-
-### Modern Glass UI
-Frosted-glass surfaces, animated gradient orbs, and Inter typography. Fully responsive across desktop and tablet viewports.
+Smooth 0.3s CSS transitions on all color changes. Theme preference persisted in `localStorage`. Keyboard shortcuts: `Ctrl+1`–`4` for presets, `Ctrl+0` for Auto.
 
 ### Progressive Web App
 Installable on desktop and mobile home screens. Works offline once the service worker caches the application shell.
@@ -160,22 +139,18 @@ Clicking any column in the sidebar enters **Focus Mode**, filtering all charts a
 
 ---
 
-## Export
-
-Click **Report PDF** or **Charts PDF** in the top bar to download.
-
-| Export        | Contents                                                                 |
-| ------------- | ------------------------------------------------------------------------ |
-| Report PDF    | Written findings (insights) followed by full-page chart figures.         |
-| Charts PDF    | One chart per page, with title, caption, and row count.                  |
-
-Both exports are generated entirely in the browser. Rendering uses an offscreen `<canvas>` element — charts are drawn, captured as PNG data URLs, and embedded into the PDF document.
-
----
-
 ## Theming
 
-Click the theme button in the top bar to open the picker. Choose from four presets or set a custom accent color. The selected theme updates all CSS custom properties and Chart.js palette colors immediately.
+Click the theme button in the top bar to open the picker. Choose from four presets, Auto (OS preference), or set a custom accent color. The selected theme updates all CSS custom properties and Chart.js palette colors immediately with a smooth 0.3s cross-fade transition.
+
+| Theme      | Shortcut | Style                     |
+| ---------- | -------- | ------------------------- |
+| Midnight   | `Ctrl+1` | Dark blue/green/amber     |
+| Graphite   | `Ctrl+2` | Muted grayscale           |
+| Paper      | `Ctrl+3` | Light & crisp             |
+| Ember      | `Ctrl+4` | Warm orange/red/yellow    |
+| Auto       | `Ctrl+0` | Follows OS preference     |
+| Custom     | —        | Accent-derived surface    |
 
 ---
 
@@ -248,8 +223,6 @@ Then add to `package.json` scripts:
 npm run tauri:build   # outputs .exe (Windows), .dmg (macOS), or .AppImage / .deb (Linux)
 ```
 
-**Alternatives:** Electron (heavier, ~150 MB) or Node SEA for a JS-based launcher.
-
 ---
 
 ## Project Structure
@@ -259,33 +232,30 @@ src/
 ├── App.tsx                    # Application shell and layout
 ├── main.tsx                   # React entry point
 ├── lib/
-│   └── chartSetup.ts          # Shared Chart.js registration and defaults
+│   └── chartSetup.ts          # Shared Chart.js registration, defaults, zoom
 ├── utils/
 │   ├── fileParser.ts          # CSV / TSV / TXT / JSON parsing
 │   ├── columnAnalyzer.ts      # Column type inference and statistics
-│   ├── insights.ts            # Deterministic statistical insight engine
-│   ├── chartRender.ts         # Offscreen Chart.js → PNG renderer
-│   ├── pdfExport.ts           # PDF generation (report + charts)
-│   ├── themes.ts              # Theme definitions and palette derivation
-│   └── useTheme.ts            # Theme state hook with localStorage persistence
+│   ├── themes.ts              # Theme definitions, palettes, surface derivation
+│   └── useTheme.tsx           # Theme context + provider + persistence
 ├── components/
 │   ├── FileUpload.tsx         # Drag-and-drop / browse input
 │   ├── DataOutline.tsx        # Column list sidebar
 │   ├── StatsCards.tsx         # Summary statistics row
-│   ├── ChartsPanel.tsx        # Chart orchestration and layout
+│   ├── ChartsPanel.tsx        # Chart orchestration + fullscreen overlay
 │   ├── HistogramChart.tsx     # Numeric distribution
 │   ├── CategoryBarChart.tsx   # Horizontal category breakdown
 │   ├── MetricBarChart.tsx     # Vertical aggregation bar chart
 │   ├── MetricLineChart.tsx    # Time-series line chart
 │   ├── MetricDoughnut.tsx     # Category share doughnut
-│   ├── DataPreview.tsx        # Paginated data table
-│   ├── ExportMenu.tsx         # PDF export controls
+│   ├── DataPreview.tsx        # Data table with search highlighting
+│   ├── SearchBar.tsx          # Topbar search with dropdown
 │   └── ThemePicker.tsx        # Theme selection popover
 └── styles/
-    └── glass.css              # Glassmorphism theme and layout
+    └── glass.css              # Theme system + compact layout
 
 public/
-└── icon.svg                   # Brand mark and PWA icon
+└── icon.svg                   # Brand mark, favicon, and PWA icon
 
 .github/workflows/
 └── deploy.yml                 # GitHub Pages auto-deploy workflow
@@ -302,12 +272,12 @@ sample-data.csv                 # 60 rows of fictional sales data
 | Build tooling   | [Vite 5](https://vitejs.dev)                                 |
 | UI framework    | [React 18](https://react.dev) + [TypeScript 5](https://www.typescriptlang.org/) |
 | Charts          | [Chart.js 4](https://www.chartjs.org) via [react-chartjs-2](https://react-chartjs-2.js.org/) |
+| Chart zoom      | [chartjs-plugin-zoom](https://www.chartjs.org/chartjs-plugin-zoom/) |
 | File parsing    | [PapaParse 5](https://www.papaparse.com)                     |
 | Drag-and-drop   | [react-dropzone 14](https://react-dropzone.js.org)           |
-| PDF generation  | [pdf-lib](https://pdf-lib.js.org)                            |
 | PWA support     | [vite-plugin-pwa](https://vite-pwa-org.netlify.app)          |
 | Typography      | [Inter](https://rsms.me/inter/) via Google Fonts             |
-| Styling         | Custom CSS (glassmorphism) — no framework dependency         |
+| Styling         | Custom CSS — no framework dependency                         |
 
 No CSS framework, no UI kit, no external state management library.
 

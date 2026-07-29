@@ -13,12 +13,12 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       manifest: {
-        name: 'Lumen — Data Dashboard',
+        name: 'Lumen — Minimal Data Dashboard',
         short_name: 'Lumen',
         description:
-          'Drop a CSV, TSV, TXT, or JSON file in and get a clean glassmorphic dashboard.',
-        theme_color: '#0b0d1a',
-        background_color: '#0b0d1a',
+          'Drop a CSV, TSV, TXT, or JSON file and explore your data with charts, search, and themes.',
+        theme_color: '#0a0a0a',
+        background_color: '#0a0a0a',
         display: 'standalone',
         orientation: 'portrait-primary',
         start_url: './',
@@ -39,16 +39,9 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // The dashboard reads files from disk in the browser — there's no remote
-        // payload to precache. Cache just the app shell so the PWA launches offline.
         globPatterns: ['**/*.{js,css,html,svg,woff2}'],
         cleanupOutdatedCaches: true,
         navigateFallback: 'index.html',
-        // Without this, the SW applies the index.html fallback to every
-        // navigation request — including the `blob:` URL our PDF export uses.
-        // That silently swallows the download in Chromium (no file is saved,
-        // the click looks like a no-op). Exclude blob: URLs from the fallback.
-        navigateFallbackDenylist: [/^blob:/],
       },
     }),
   ],
