@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FileUpload } from './components/FileUpload';
 import { DataOutline } from './components/DataOutline';
 import { ChartsPanel } from './components/ChartsPanel';
@@ -87,6 +87,13 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [folderFiles, setFolderFiles] = useState<FolderFile[] | null>(null);
   const [recentFolders, setRecentFolders] = useState<RecentFolder[]>(loadRecent);
+  const toastTimer = useRef<number | undefined>(undefined);
+
+  const showToast = useCallback((t: Toast) => {
+    window.clearTimeout(toastTimer.current);
+    setToast(t);
+    toastTimer.current = window.setTimeout(() => setToast(null), 3500);
+  }, []);
 
   // Refresh recent list on mount (in case another tab wrote)
   useEffect(() => {
@@ -95,33 +102,30 @@ export default function App() {
 
   const onFile = useCallback(async (file: File) => {
     setBusy(true);
-    setToast(null);
     try {
       const result = await parseFile(file);
       setParsed(result);
       setSelected(null);
       if (result.rows.length === 0) {
-        setToast({ msg: `${file.name} parsed but contained no rows.`, kind: 'info' });
+        showToast({ msg: `${file.name} parsed but contained no rows.`, kind: 'info' });
       } else {
-        setToast({
-          msg: `${result.rows.length.toLocaleString()} rows · ${result.columns.length} columns`,
+        showToast({
+          msg: `${result.rows.length.toLocaleString()} rows \u00b7 ${result.columns.length} columns`,
           kind: 'info',
         });
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to parse file.';
-      setToast({ msg, kind: 'error' });
+      showToast({ msg, kind: 'error' });
     } finally {
       setBusy(false);
-      window.setTimeout(() => setToast(null), 3500);
     }
-  }, []);
+  }, [showToast]);
 
   const onFolder = useCallback((files: File[]) => {
     const { folderName, files: filtered } = filterFolderFiles(files);
     if (filtered.length === 0) {
-      setToast({ msg: 'No supported files found in this folder.', kind: 'error' });
-      window.setTimeout(() => setToast(null), 3500);
+      showToast({ msg: 'No supported files found in this folder.', kind: 'error' });
       return;
     }
     setFolderFiles(filtered);
@@ -130,12 +134,11 @@ export default function App() {
     const totalSize = filtered.reduce((sum, f) => sum + f.size, 0);
     addRecent(folderName, filtered.length, totalSize);
     setRecentFolders(loadRecent());
-    setToast({
+    showToast({
       msg: `${filtered.length} file${filtered.length !== 1 ? 's' : ''} found in ${folderName}`,
       kind: 'info',
     });
-    window.setTimeout(() => setToast(null), 3500);
-  }, []);
+  }, [showToast]);
 
   const onFolderFileSelect = useCallback(
     async (file: File) => {
@@ -154,19 +157,6 @@ export default function App() {
     setSelected(null);
   }, []);
 
-  const onReset = useCallback(() => {
-    setParsed(null);
-    setSelected(null);
-    setToast(null);
-    setFolderFiles(null);
-  }, []);
-
-  const onClearRecent = useCallback((name: string) => {
-    const updated = loadRecent().filter((f) => f.name !== name);
-    saveRecent(updated);
-    setRecentFolders(updated);
-  }, []);
-
   const columnStats = useMemo(() => {
     if (!parsed) return [];
     return analyzeColumns(parsed.rows, parsed.columns);
@@ -176,6 +166,24 @@ export default function App() {
   const hasFolder = folderFiles && folderFiles.length > 0;
   const showFolder = hasFolder && !loaded;
   const showEmpty = !hasFolder && !loaded;
+
+  const onReset = useCallback(() => {
+    window.clearTimeout(toastTimer.current);
+    setParsed(null);
+    setSelected(null);
+    setToast(null);
+    // When viewing a file from a folder, keep the folder context.
+    // Otherwise (single file), clear everything.
+    if (!hasFolder) {
+      setFolderFiles(null);
+    }
+  }, [hasFolder]);
+
+  const onClearRecent = useCallback((name: string) => {
+    const updated = loadRecent().filter((f) => f.name !== name);
+    saveRecent(updated);
+    setRecentFolders(updated);
+  }, []);
 
   return (
     <div className="app-shell">
