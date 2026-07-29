@@ -53,7 +53,7 @@ export function ThemePicker() {
       >
         <span className="theme-dot" style={dotStyle} />
         <span className="theme-trigger-label">
-          {activePreset?.label ?? 'custom'}
+          {activePreset?.label ?? 'Custom'}
         </span>
       </button>
       {open && (

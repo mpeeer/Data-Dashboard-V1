@@ -34,25 +34,25 @@ const FALLBACK_PALETTE = [
 export const PRESET_THEMES: PresetTheme[] = [
   {
     id: 'lumen',
-    label: 'lumen',
+    label: 'Lumen',
     swatch: ['#60a5fa', '#34d399', '#fbbf24'],
     palette: ['#60a5fa', '#34d399', '#fbbf24', '#f87171', '#a78bfa', '#2dd4bf'],
   },
   {
     id: 'graphite',
-    label: 'graphite',
+    label: 'Graphite',
     swatch: ['#9ca3af', '#a3a3a3', '#737373'],
     palette: ['#9ca3af', '#b8c0cc', '#7a8290', '#d1d5db', '#8b92a0', '#a3aab6'],
   },
   {
     id: 'paper',
-    label: 'paper',
+    label: 'Paper',
     swatch: ['#2563eb', '#16a34a', '#d97706'],
     palette: ['#2563eb', '#16a34a', '#d97706', '#dc2626', '#7c3aed', '#0d9488'],
   },
   {
     id: 'ember',
-    label: 'ember',
+    label: 'Ember',
     swatch: ['#fb923c', '#fbbf24', '#ef4444'],
     palette: ['#fb923c', '#fbbf24', '#ef4444', '#f43f5e', '#facc15', '#fb7185'],
   },
