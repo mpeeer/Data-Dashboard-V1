@@ -1,18 +1,36 @@
-// React hook for the active theme. Persists choice in localStorage and
-// applies [data-theme] (preset) or inline `--accent` (custom) on <html> so
+// React hook + context for the active theme. Persists choice in localStorage
+// and applies [data-theme] (preset) or inline `--accent` (custom) on <html> so
 // every CSS rule in glass.css picks up the change for free. Multi-tab
 // sessions stay in sync via the storage event. Initial application is
 // synchronous at module load so the first paint already shows the right
-// theme — no lumen-then-swap flash if localStorage holds a different theme.
+// theme — no midnight-then-swap flash if localStorage holds a different theme.
+//
+// Uses React Context so every component that calls useTheme() shares the
+// same state. When ThemePicker switches themes, chart components re-render
+// with the new palette.
 //
 // Type definitions (ThemeId, ThemeState) live in ./themes (not here) so the
 // type imports into themes.ts are non-circular.
 
-import { useCallback, useEffect, useState } from 'react';
-import { PRESET_THEMES, type PresetId } from './themes';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
+import {
+  PRESET_THEMES,
+  resolveTheme,
+  deriveCustomSurface,
+  CUSTOM_SURFACE_PROPS,
+  type PresetId,
+} from './themes';
 
 export type { ThemeId, ThemeState } from './themes';
-import type { ThemeState } from './themes';
+import type { ThemeState, ThemeId } from './themes';
 
 const STORAGE_KEY = 'lumen-theme';
 
@@ -28,6 +46,7 @@ function loadInitial(): ThemeState {
     if (parsed.themeId === 'custom' && typeof parsed.accent === 'string') {
       return { themeId: 'custom', accent: parsed.accent };
     }
+    if (parsed.themeId === 'auto') return { themeId: 'auto' };
     if (validPresets) return { themeId: parsed.themeId as PresetId };
     return DEFAULT_THEME;
   } catch {
@@ -35,16 +54,33 @@ function loadInitial(): ThemeState {
   }
 }
 
+function clearCustomSurface(root: HTMLElement): void {
+  for (const prop of CUSTOM_SURFACE_PROPS) {
+    root.style.removeProperty(prop);
+  }
+}
+
 function applyToDocument(state: ThemeState): void {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
-  if (state.themeId === 'custom') {
+
+  if (state.themeId === 'auto') {
+    const resolved = resolveTheme(state);
+    root.setAttribute('data-theme', resolved);
+    clearCustomSurface(root);
+  } else if (state.themeId === 'custom') {
     root.setAttribute('data-theme', 'custom');
-    if (state.accent) root.style.setProperty('--accent', state.accent);
-    else root.style.removeProperty('--accent');
+    if (state.accent) {
+      const vars = deriveCustomSurface(state.accent);
+      for (const [key, value] of Object.entries(vars)) {
+        root.style.setProperty(key, value);
+      }
+    } else {
+      clearCustomSurface(root);
+    }
   } else {
     root.setAttribute('data-theme', state.themeId);
-    root.style.removeProperty('--accent');
+    clearCustomSurface(root);
   }
 }
 
@@ -63,11 +99,18 @@ function persist(state: ThemeState): void {
   }
 }
 
-export function useTheme(): {
+// ---------- React Context (shared state across all consumers) ----------
+
+interface ThemeCtx {
   theme: ThemeState;
   setPreset: (id: PresetId) => void;
   setCustom: (accent: string) => void;
-} {
+  setAuto: () => void;
+}
+
+const ThemeContext = createContext<ThemeCtx | null>(null);
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeState>(loadInitial);
 
   useEffect(() => {
@@ -84,6 +127,24 @@ export function useTheme(): {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
+  // OS color-scheme listener: re-apply whenever the preference changes
+  // while the "auto" theme is active. Uses a ref to avoid re-registering
+  // the listener on every theme state change.
+  const themeRef = useRef(theme);
+  themeRef.current = theme;
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => {
+      const current = themeRef.current;
+      if (current.themeId === 'auto') {
+        applyToDocument(current);
+        setThemeState((prev) => ({ ...prev }));
+      }
+    };
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
   const setPreset = useCallback((id: PresetId) => {
     const next: ThemeState = { themeId: id };
     setThemeState(next);
@@ -96,5 +157,26 @@ export function useTheme(): {
     persist(next);
   }, []);
 
-  return { theme, setPreset, setCustom };
+  const setAuto = useCallback(() => {
+    const next: ThemeState = { themeId: 'auto' };
+    setThemeState(next);
+    persist(next);
+  }, []);
+
+  const value = useMemo<ThemeCtx>(
+    () => ({ theme, setPreset, setCustom, setAuto }),
+    [theme, setPreset, setCustom, setAuto],
+  );
+
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
+}
+
+export function useTheme(): ThemeCtx {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) {
+    throw new Error('useTheme() must be used inside a <ThemeProvider>');
+  }
+  return ctx;
 }

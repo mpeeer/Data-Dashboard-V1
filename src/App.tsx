@@ -100,7 +100,6 @@ export default function App() {
           <main className="main">
             <StatsCards columns={columnStats} totalRows={parsed.rows.length} />
             <ChartsPanel
-              key={`${theme.themeId}:${theme.accent ?? ''}`}
               rows={parsed.rows}
               columns={columnStats}
               selected={selected}

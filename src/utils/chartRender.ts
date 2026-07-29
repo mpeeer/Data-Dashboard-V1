@@ -1,5 +1,6 @@
 // Render chart.js chart configurations to base64 PNGs offscreen.
-// Light-theme variant so charts look right on a white PDF page.
+// Light-theme surface so charts look right on a white PDF page, but
+// the data palette comes from the caller (active theme's colors).
 
 import {
   Chart as ChartJS,
@@ -27,15 +28,14 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
 );
 
-const LIGHT_THEME = {
+const LIGHT_SURFACE = {
   text: '#1a1a1a',
   textMute: '#666666',
   grid: '#e5e5e5',
   bg: '#ffffff',
-  palette: ['#2563eb', '#16a34a', '#f59e0b', '#dc2626', '#7c3aed', '#0d9488', '#db2777', '#64748b'],
 };
 
 async function mountChart(cfg: ChartConfiguration): Promise<HTMLCanvasElement> {
@@ -57,7 +57,7 @@ async function mountChart(cfg: ChartConfiguration): Promise<HTMLCanvasElement> {
 
   // Give chart.js two animation frames to fully layout + draw (then disable animations for repeat calls).
   await new Promise<void>((resolve) =>
-    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
   );
 
   return canvas;
@@ -74,7 +74,7 @@ function lightBaseOptions(fontFamily = 'system-ui, -apple-system, sans-serif') {
         position: 'top' as const,
         align: 'end' as const,
         labels: {
-          color: LIGHT_THEME.textMute,
+          color: LIGHT_SURFACE.textMute,
           boxWidth: 10,
           boxHeight: 10,
           usePointStyle: false,
@@ -86,16 +86,16 @@ function lightBaseOptions(fontFamily = 'system-ui, -apple-system, sans-serif') {
     },
     scales: {
       x: {
-        ticks: { color: LIGHT_THEME.textMute, font: { family: fontFamily, size: 10 } },
-        grid: { color: LIGHT_THEME.grid, display: false },
+        ticks: { color: LIGHT_SURFACE.textMute, font: { family: fontFamily, size: 10 } },
+        grid: { color: LIGHT_SURFACE.grid, display: false },
         border: { display: false },
       },
       y: {
         ticks: {
-          color: LIGHT_THEME.textMute,
+          color: LIGHT_SURFACE.textMute,
           font: { family: fontFamily, size: 10 },
         },
-        grid: { color: LIGHT_THEME.grid, drawTicks: false },
+        grid: { color: LIGHT_SURFACE.grid, drawTicks: false },
         border: { display: false },
       },
     },
@@ -136,110 +136,114 @@ async function renderOnce(builder: () => ChartConfiguration): Promise<string> {
   return url;
 }
 
-export const chartRender = {
-  histogram(values: number[], label: string): Promise<string> {
-    const { labels, counts } = binValues(values, 10);
-    return renderOnce(() => ({
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [
-          {
-            label,
-            data: counts,
-            backgroundColor: LIGHT_THEME.palette[0],
-            borderRadius: 2,
-            borderSkipped: false,
-            maxBarThickness: 60,
-            categoryPercentage: 0.95,
-            barPercentage: 1,
-          },
-        ],
-      },
-      options: { ...lightBaseOptions() },
-    }));
-  },
+export function createChartRender(palette: string[]) {
+  const p = palette;
 
-  categoryHorizontal(labels: string[], values: number[], label: string): Promise<string> {
-    return renderOnce(() => ({
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [
-          {
-            label,
-            data: values,
-            backgroundColor: labels.map((_, i) => LIGHT_THEME.palette[i % LIGHT_THEME.palette.length]),
-            borderRadius: 2,
-            borderSkipped: false,
-            maxBarThickness: 28,
-          },
-        ],
-      },
-      options: { ...lightBaseOptions(), indexAxis: 'y' as const },
-    }));
-  },
+  return {
+    histogram(values: number[], label: string): Promise<string> {
+      const { labels, counts } = binValues(values, 10);
+      return renderOnce(() => ({
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label,
+              data: counts,
+              backgroundColor: p[0],
+              borderRadius: 2,
+              borderSkipped: false,
+              maxBarThickness: 60,
+              categoryPercentage: 0.95,
+              barPercentage: 1,
+            },
+          ],
+        },
+        options: { ...lightBaseOptions() },
+      }));
+    },
 
-  barVertical(labels: string[], values: number[], label: string): Promise<string> {
-    return renderOnce(() => ({
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [
-          {
-            label,
-            data: values,
-            backgroundColor: LIGHT_THEME.palette[0],
-            borderRadius: 2,
-            borderSkipped: false,
-            maxBarThickness: 60,
-          },
-        ],
-      },
-      options: { ...lightBaseOptions() },
-    }));
-  },
+    categoryHorizontal(labels: string[], values: number[], label: string): Promise<string> {
+      return renderOnce(() => ({
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label,
+              data: values,
+              backgroundColor: labels.map((_, i) => p[i % p.length]),
+              borderRadius: 2,
+              borderSkipped: false,
+              maxBarThickness: 28,
+            },
+          ],
+        },
+        options: { ...lightBaseOptions(), indexAxis: 'y' as const },
+      }));
+    },
 
-  line(labels: string[], values: number[], label: string): Promise<string> {
-    return renderOnce(() => ({
-      type: 'line',
-      data: {
-        labels,
-        datasets: [
-          {
-            label,
-            data: values,
-            borderColor: LIGHT_THEME.palette[0],
-            backgroundColor: 'rgba(37, 99, 235, 0.08)',
-            fill: true,
-            tension: 0.3,
-            pointRadius: 0,
-            pointHoverRadius: 0,
-            borderWidth: 2,
-          },
-        ],
-      },
-      options: { ...lightBaseOptions() },
-    }));
-  },
+    barVertical(labels: string[], values: number[], label: string): Promise<string> {
+      return renderOnce(() => ({
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label,
+              data: values,
+              backgroundColor: p[0],
+              borderRadius: 2,
+              borderSkipped: false,
+              maxBarThickness: 60,
+            },
+          ],
+        },
+        options: { ...lightBaseOptions() },
+      }));
+    },
 
-  doughnut(labels: string[], values: number[], label: string): Promise<string> {
-    return renderOnce(() => ({
-      type: 'doughnut',
-      data: {
-        labels,
-        datasets: [
-          {
-            label,
-            data: values,
-            backgroundColor: labels.map((_, i) => LIGHT_THEME.palette[i % LIGHT_THEME.palette.length]),
-            borderColor: '#ffffff',
-            borderWidth: 2,
-            hoverOffset: 0,
-          },
-        ],
-      },
-      options: { ...lightBaseOptions(), cutout: '60%', scales: undefined },
-    }));
-  },
-};
+    line(labels: string[], values: number[], label: string): Promise<string> {
+      return renderOnce(() => ({
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label,
+              data: values,
+              borderColor: p[0],
+              backgroundColor: 'rgba(37, 99, 235, 0.08)',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 0,
+              pointHoverRadius: 0,
+              borderWidth: 2,
+            },
+          ],
+        },
+        options: { ...lightBaseOptions() },
+      }));
+    },
+
+    doughnut(labels: string[], values: number[], label: string): Promise<string> {
+      return renderOnce(() => ({
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [
+            {
+              label,
+              data: values,
+              backgroundColor: labels.map((_, i) => p[i % p.length]),
+              borderColor: '#ffffff',
+              borderWidth: 2,
+              hoverOffset: 0,
+            },
+          ],
+        },
+        options: { ...lightBaseOptions(), cutout: '60%', scales: undefined },
+      }));
+    },
+  };
+}

@@ -1,8 +1,10 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { ColumnStats } from '../utils/columnAnalyzer';
 import type { Row } from '../utils/fileParser';
 import { generateInsights } from '../utils/insights';
 import { generateReport, generateCharts } from '../utils/pdfExport';
+import { useTheme } from '../utils/useTheme';
+import { getActivePalette } from '../utils/themes';
 
 interface ExportMenuProps {
   fileName: string;
@@ -37,33 +39,35 @@ const downloadBytes = (bytes: Uint8Array, fileName: string) => {
 
 export function ExportMenu({ fileName, rows, columns, selected }: ExportMenuProps) {
   const [busy, setBusy] = useState<Busy>('idle');
+  const { theme } = useTheme();
+  const palette = useMemo(() => getActivePalette(theme), [theme]);
 
   const runReport = useCallback(async () => {
     if (busy !== 'idle') return;
     setBusy('report');
     try {
       const insights = generateInsights(columns, rows);
-      const pdf = await generateReport({ fileName, rows, columns, selected, insights });
+      const pdf = await generateReport({ fileName, rows, columns, selected, insights, palette });
       downloadBytes(pdf, `${stripExt(fileName)}-report.pdf`);
     } catch (err) {
       console.error('[ExportMenu] report failed', err);
     } finally {
       setBusy('idle');
     }
-  }, [busy, fileName, rows, columns, selected]);
+  }, [busy, fileName, rows, columns, selected, palette]);
 
   const runCharts = useCallback(async () => {
     if (busy !== 'idle') return;
     setBusy('charts');
     try {
-      const pdf = await generateCharts({ fileName, rows, columns, selected });
+      const pdf = await generateCharts({ fileName, rows, columns, selected, palette });
       downloadBytes(pdf, `${stripExt(fileName)}-charts.pdf`);
     } catch (err) {
       console.error('[ExportMenu] charts failed', err);
     } finally {
       setBusy('idle');
     }
-  }, [busy, fileName, rows, columns, selected]);
+  }, [busy, fileName, rows, columns, selected, palette]);
 
   return (
     <div className="export-menu" role="group" aria-label="Export">

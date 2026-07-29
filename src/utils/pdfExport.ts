@@ -5,7 +5,7 @@
 import { PDFDocument, PDFFont, StandardFonts, rgb, PageSizes } from 'pdf-lib';
 import type { ColumnStats } from './columnAnalyzer';
 import type { Insight } from './insights';
-import { chartRender } from './chartRender';
+import { createChartRender } from './chartRender';
 
 interface ChartImg {
   title: string;
@@ -301,6 +301,7 @@ interface BuildChartsInput {
   rows: Row[];
   columns: ColumnStats[];
   selected: string | null;
+  palette: string[];
 }
 
 const collectNumeric = (rows: Row[], col: string): number[] => {
@@ -375,6 +376,7 @@ interface ExportableChart {
 async function buildChartImages(input: BuildChartsInput): Promise<ExportableChart[]> {
   // Mirror ChartsPanel's logic so the report matches what's on screen.
   const stats = input.columns;
+  const render = createChartRender(input.palette);
   const targeted = input.selected
     ? stats.filter((s) => s.name === input.selected)
     : stats;
@@ -393,7 +395,7 @@ async function buildChartImages(input: BuildChartsInput): Promise<ExportableChar
   for (const c of nums.slice(0, 4)) {
     const values = collectNumeric(input.rows, c.name);
     if (values.length === 0) continue;
-    const png = await chartRender.histogram(values, c.name);
+    const png = await render.histogram(values, c.name);
     out.push({
       title: `Distribution of ${c.name}`,
       caption: `${values.length.toLocaleString()} values · mean ${fmt(c.numeric!.mean)} · σ ${fmt(c.numeric!.stdev)}`,
@@ -406,7 +408,7 @@ async function buildChartImages(input: BuildChartsInput): Promise<ExportableChar
     for (const c of list) {
       if (!c.categories || c.categories.length === 0) continue;
       const top = c.categories.slice(0, 8);
-      const png = await chartRender.categoryHorizontal(
+      const png = await render.categoryHorizontal(
         top.map((t) => t.value),
         top.map((t) => t.count),
         c.name
@@ -424,7 +426,7 @@ async function buildChartImages(input: BuildChartsInput): Promise<ExportableChar
     const numCol = nums[0].name;
     const ts = aggregateByDate(input.rows, dateCol, numCol);
     if (ts.length >= 3) {
-      const png = await chartRender.line(
+      const png = await render.line(
         ts.map((p) => p.x),
         ts.map((p) => p.y),
         numCol
@@ -444,7 +446,7 @@ async function buildChartImages(input: BuildChartsInput): Promise<ExportableChar
       const aggs = aggregateByCategory(input.rows, c.name, numCol);
       if (aggs.length < 2) continue;
       const top = [...aggs].sort((a, b) => b.mean - a.mean).slice(0, 8);
-      const png = await chartRender.barVertical(
+      const png = await render.barVertical(
         top.map((t) => t.label),
         top.map((t) => t.mean),
         numCol
@@ -461,7 +463,7 @@ async function buildChartImages(input: BuildChartsInput): Promise<ExportableChar
   if (donutStr?.categories) {
     const top = donutStr.categories.slice(0, 6);
     if (top.length >= 2) {
-      const png = await chartRender.doughnut(
+      const png = await render.doughnut(
         top.map((t) => t.value),
         top.map((t) => t.count),
         donutStr.name

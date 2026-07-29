@@ -1,10 +1,10 @@
 // Theme definitions for the dashboard.
 // Each preset theme = a complete CSS variable override (glass.css [data-theme="..."])
-// plus a 6-color palette for chart.js. The "custom" theme is just an accent hue
-// the user dialed in; its palette is derived at runtime via paletteFromAccent.
+// plus a 6-color palette for chart.js. The "custom" theme derives a full surface
+// from the user's accent. The "auto" theme follows the OS light/dark preference.
 
-export type ThemeId = 'lumen' | 'graphite' | 'paper' | 'ember' | 'custom';
-export type PresetId = Exclude<ThemeId, 'custom'>;
+export type ThemeId = 'lumen' | 'graphite' | 'paper' | 'ember' | 'custom' | 'auto';
+export type PresetId = Exclude<ThemeId, 'custom' | 'auto'>;
 
 export interface ThemeState {
   themeId: ThemeId;
@@ -34,7 +34,7 @@ const FALLBACK_PALETTE = [
 export const PRESET_THEMES: PresetTheme[] = [
   {
     id: 'lumen',
-    label: 'Lumen',
+    label: 'Midnight',
     swatch: ['#60a5fa', '#34d399', '#fbbf24'],
     palette: ['#60a5fa', '#34d399', '#fbbf24', '#f87171', '#a78bfa', '#2dd4bf'],
   },
@@ -42,7 +42,7 @@ export const PRESET_THEMES: PresetTheme[] = [
     id: 'graphite',
     label: 'Graphite',
     swatch: ['#9ca3af', '#a3a3a3', '#737373'],
-    palette: ['#9ca3af', '#b8c0cc', '#7a8290', '#d1d5db', '#8b92a0', '#a3aab6'],
+    palette: ['#9ca3af', '#7aa2b8', '#a3b89a', '#c4a882', '#8b92a0', '#a3aab6'],
   },
   {
     id: 'paper',
@@ -57,6 +57,74 @@ export const PRESET_THEMES: PresetTheme[] = [
     palette: ['#fb923c', '#fbbf24', '#ef4444', '#f43f5e', '#facc15', '#fb7185'],
   },
 ];
+
+// ---------- Auto-theme resolution ----------
+
+/**
+ * Resolve 'auto' to the effective preset based on the OS color-scheme
+ * preference. Falls back to 'lumen' (dark) when no preference is set.
+ */
+export function resolveTheme(theme: ThemeState): ThemeId {
+  if (theme.themeId !== 'auto') return theme.themeId;
+  if (
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-color-scheme: light)').matches
+  ) {
+    return 'paper';
+  }
+  return 'lumen';
+}
+
+// ---------- Custom theme surface derivation ----------
+
+const DARK_SURFACE: Record<string, string> = {
+  '--bg': '#0a0a0a',
+  '--bg-elev': '#111111',
+  '--bg-hover': '#171717',
+  '--border': '#262626',
+  '--border-strong': '#404040',
+  '--text': '#ededed',
+  '--text-soft': '#a3a3a3',
+  '--text-mute': '#737373',
+  '--good': '#34d399',
+  '--warn': '#fbbf24',
+  '--bad': '#f87171',
+};
+
+const LIGHT_SURFACE: Record<string, string> = {
+  '--bg': '#f7f7f5',
+  '--bg-elev': '#ffffff',
+  '--bg-hover': '#ecece8',
+  '--border': '#d8d8d2',
+  '--border-strong': '#a8a8a0',
+  '--text': '#1a1a1a',
+  '--text-soft': '#4a4a4a',
+  '--text-mute': '#6e6e6a',
+  '--good': '#16a34a',
+  '--warn': '#d97706',
+  '--bad': '#dc2626',
+};
+
+/** CSS custom-property names that deriveCustomSurface sets on :root. */
+export const CUSTOM_SURFACE_PROPS = [
+  '--bg', '--bg-elev', '--bg-hover',
+  '--border', '--border-strong',
+  '--text', '--text-soft', '--text-mute',
+  '--accent', '--good', '--warn', '--bad',
+];
+
+/**
+ * Given a user-picked accent, choose a light or dark surface based on the
+ * accent's perceptual luminance, then return the full set of CSS custom
+ * properties for a complete theme (not just --accent).
+ */
+export function deriveCustomSurface(accent: string): Record<string, string> {
+  const { l } = hexToHsl(accent);
+  const isLight = l > 55;
+  const surface = isLight ? { ...LIGHT_SURFACE } : { ...DARK_SURFACE };
+  surface['--accent'] = accent;
+  return surface;
+}
 
 // ---------- HSL <-> HEX for palette derivation from a single accent ----------
 
@@ -123,10 +191,11 @@ export function paletteFromAccent(accent: string): string[] {
 }
 
 export function getActivePalette(theme: ThemeState): string[] {
-  if (theme.themeId === 'custom' && theme.accent) {
+  const resolved = resolveTheme(theme);
+  if (resolved === 'custom' && theme.accent) {
     return paletteFromAccent(theme.accent);
   }
-  const preset = PRESET_THEMES.find((t) => t.id === theme.themeId);
+  const preset = PRESET_THEMES.find((t) => t.id === resolved);
   return preset?.palette ?? FALLBACK_PALETTE;
 }
 
@@ -142,14 +211,13 @@ export interface SurfaceColors {
   isLight: boolean;
 }
 
-/** Currently only `paper` is light. Custom accent stays on the lumen dark
- * surface, so we don't flip for `custom`. */
 export function isLightTheme(themeId: ThemeId): boolean {
   return themeId === 'paper';
 }
 
 export function getSurfaceColors(theme: ThemeState): SurfaceColors {
-  return isLightTheme(theme.themeId)
+  const resolved = resolveTheme(theme);
+  return isLightTheme(resolved)
     ? { textMute: 'rgba(60,60,60,0.85)', grid: 'rgba(0,0,0,0.07)', isLight: true }
     : { textMute: 'rgba(160,160,160,0.85)', grid: 'rgba(255,255,255,0.04)', isLight: false };
 }
