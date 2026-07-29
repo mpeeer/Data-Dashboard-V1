@@ -22,6 +22,10 @@
 
 Lumen is a data exploration tool that runs entirely in your browser. Drop in a file. Charts, statistics, search — all rendered locally. Nothing leaves your machine.
 
+<p align="center">
+  <img src="public/screenshot.png" alt="Lumen dashboard" width="800" />
+</p>
+
 ---
 
 ## What it does
