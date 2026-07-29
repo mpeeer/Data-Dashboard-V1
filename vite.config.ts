@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 // `base: './'` produces asset paths relative to the document so the build works
-// at any prefix (root, /lumen/, /Data-Dashboard-V1/, a custom Pages URL, etc.).
+// at any prefix (root, /lumen/, a custom Pages URL, etc.).
 // Override at build time with `vite build --base=/my-path/`.
 export default defineConfig({
   base: './',
