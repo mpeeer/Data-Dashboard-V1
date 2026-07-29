@@ -12,6 +12,7 @@ import {
   Filler,
   type ChartOptions,
 } from 'chart.js';
+import zoomPlugin from 'chartjs-plugin-zoom';
 
 ChartJS.register(
   CategoryScale,
@@ -23,7 +24,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
+  zoomPlugin,
 );
 
 import type { SurfaceColors } from '../utils/themes';
@@ -77,6 +79,34 @@ export function getBaseChartOptions(surface: SurfaceColors): ChartOptions {
         },
         grid: { color: surface.grid, drawTicks: false },
         border: { display: false },
+      },
+    },
+  };
+}
+
+/** Adds zoom + pan plugin options to chart config. Only called when the
+ * chart is rendered in fullscreen mode. */
+export function addZoomOptions(opts: Record<string, unknown>): Record<string, unknown> {
+  return {
+    ...opts,
+    plugins: {
+      ...(opts.plugins as Record<string, unknown> | undefined),
+      zoom: {
+        pan: {
+          enabled: true,
+          mode: 'xy' as const,
+          threshold: 5,
+        },
+        zoom: {
+          wheel: { enabled: true },
+          pinch: { enabled: true },
+          drag: { enabled: false },
+          mode: 'xy' as const,
+        },
+        limits: {
+          x: { min: 'original' as const, max: 'original' as const },
+          y: { min: 'original' as const, max: 'original' as const },
+        },
       },
     },
   };

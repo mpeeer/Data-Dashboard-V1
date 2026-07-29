@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { ColumnStats } from '../utils/columnAnalyzer';
 import type { Row } from '../utils/fileParser';
 import { HistogramChart } from './HistogramChart';
@@ -27,25 +27,91 @@ export function ChartsPanel({ rows, columns, selected }: ChartsPanelProps) {
 
   const charts = useMemo(
     () => buildCharts(rows, targeted, selected),
-    [rows, targeted, selected]
+    [rows, targeted, selected],
   );
+
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+  const [resetKey, setResetKey] = useState(0);
+
+  // Close on Escape
+  useEffect(() => {
+    if (expandedIdx === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setExpandedIdx(null);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [expandedIdx]);
+
+  const expandedChart = expandedIdx !== null ? charts[expandedIdx] : null;
 
   if (charts.length === 0) {
     return <div className="no-charts">No charts can be drawn from this column.</div>;
   }
 
   return (
-    <div className="charts-grid">
-      {charts.map((c, i) => (
-        <div key={i} className="chart-card">
-          <div className="chart-head">
-            <h4 className="chart-title">{c.title}</h4>
-            <div className="chart-subtitle">{c.subtitle}</div>
+    <>
+      <div className="charts-grid">
+        {charts.map((c, i) => (
+          <div key={i} className="chart-card">
+            <div className="chart-head">
+              <h4 className="chart-title">{c.title}</h4>
+              <div className="chart-subtitle">{c.subtitle}</div>
+              <button
+                type="button"
+                className="chart-expand-btn"
+                title="Fullscreen"
+                aria-label={`Expand ${c.title}`}
+                onClick={() => setExpandedIdx(i)}
+              >
+                ↗
+              </button>
+            </div>
+            <div className="chart-canvas">{c.node}</div>
           </div>
-          <div className="chart-canvas">{c.node}</div>
+        ))}
+      </div>
+
+      {/* Fullscreen overlay */}
+      {expandedChart && (
+        <div
+          className="chart-fs-backdrop"
+          onClick={() => setExpandedIdx(null)}
+        >
+          <div
+            className="chart-fs-body"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="chart-fs-head">
+              <h4 className="chart-title">{expandedChart.title}</h4>
+              <div className="chart-subtitle">{expandedChart.subtitle}</div>
+              <div className="chart-fs-actions">
+                <button
+                  type="button"
+                  className="btn chart-fs-reset"
+                  onClick={() => setResetKey((k) => k + 1)}
+                >
+                  Reset zoom
+                </button>
+                <button
+                  type="button"
+                  className="btn chart-fs-close"
+                  onClick={() => setExpandedIdx(null)}
+                  aria-label="Close fullscreen"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            <div className="chart-fs-canvas" key={resetKey}>
+              {React.isValidElement(expandedChart.node)
+                ? React.cloneElement(expandedChart.node as React.ReactElement<{ zoom?: boolean }>, { zoom: true })
+                : expandedChart.node}
+            </div>
+          </div>
         </div>
-      ))}
-    </div>
+      )}
+    </>
   );
 }
 
@@ -58,7 +124,7 @@ interface ChartCard {
 function buildCharts(
   rows: Row[],
   stats: ColumnStats[],
-  selected: string | null
+  selected: string | null,
 ): ChartCard[] {
   const cards: ChartCard[] = [];
 
@@ -77,7 +143,7 @@ function buildCharts(
     if (values.length === 0) continue;
     cards.push({
       title: `Distribution of ${c.name}`,
-      subtitle: `${values.length.toLocaleString()} values \u00b7 mean ${fmt(c.numeric!.mean)}`,
+      subtitle: `${values.length.toLocaleString()} values · mean ${fmt(c.numeric!.mean)}`,
       node: <HistogramChart values={values} label={c.name} />,
     });
   }
@@ -222,7 +288,7 @@ function aggregateByCategory(rows: Row[], catCol: string, numCol: string) {
 }
 
 function fmt(n: number): string {
-  if (!Number.isFinite(n)) return '\u2013';
+  if (!Number.isFinite(n)) return '–';
   if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(2) + 'M';
   if (Math.abs(n) >= 1e3) return n.toLocaleString(undefined, { maximumFractionDigits: 1 });
   if (Number.isInteger(n)) return n.toLocaleString();

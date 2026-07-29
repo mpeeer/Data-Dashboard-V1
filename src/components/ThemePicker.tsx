@@ -4,7 +4,7 @@
 // Focus is trapped inside the popover while open.
 // Global shortcuts: Ctrl+1..4 = presets, Ctrl+0 = Auto.
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   PRESET_THEMES,
   type PresetId,

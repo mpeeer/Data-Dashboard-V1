@@ -8,9 +8,10 @@ interface MetricDoughnutProps {
   labels: string[];
   values: number[];
   label: string;
+  zoom?: boolean;
 }
 
-export function MetricDoughnut({ labels, values, label }: MetricDoughnutProps) {
+export function MetricDoughnut({ labels, values, label, zoom: _zoom }: MetricDoughnutProps) {
   const { theme } = useTheme();
   const { palette, surface } = getThemeContext(theme);
   // Doughnut slice borders need to read against the active surface so the

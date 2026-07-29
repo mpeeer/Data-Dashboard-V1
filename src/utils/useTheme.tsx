@@ -18,6 +18,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -30,7 +31,7 @@ import {
 } from './themes';
 
 export type { ThemeId, ThemeState } from './themes';
-import type { ThemeState, ThemeId } from './themes';
+import type { ThemeState } from './themes';
 
 const STORAGE_KEY = 'lumen-theme';
 

@@ -1,6 +1,6 @@
 import { Line } from 'react-chartjs-2';
 import type { ChartData, ChartOptions } from 'chart.js';
-import { getBaseChartOptions } from '../lib/chartSetup';
+import { getBaseChartOptions, addZoomOptions } from '../lib/chartSetup';
 import { getThemeContext, hexToRgba } from '../utils/themes';
 import { useTheme } from '../utils/useTheme';
 
@@ -8,9 +8,10 @@ interface MetricLineChartProps {
   labels: string[];
   values: number[];
   label: string;
+  zoom?: boolean;
 }
 
-export function MetricLineChart({ labels, values, label }: MetricLineChartProps) {
+export function MetricLineChart({ labels, values, label, zoom }: MetricLineChartProps) {
   const { theme } = useTheme();
   const { palette, surface } = getThemeContext(theme);
   const accent = palette[0];
@@ -39,7 +40,8 @@ export function MetricLineChart({ labels, values, label }: MetricLineChartProps)
     ],
   };
 
-  const options = { ...getBaseChartOptions(surface) };
+  let options = { ...getBaseChartOptions(surface) } as Record<string, unknown>;
+  if (zoom) options = addZoomOptions(options);
 
   return <Line data={data} options={options as ChartOptions<'line'>} />;
 }

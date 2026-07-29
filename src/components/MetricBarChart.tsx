@@ -1,6 +1,6 @@
 import { Bar } from 'react-chartjs-2';
 import type { ChartData, ChartOptions } from 'chart.js';
-import { getBaseChartOptions } from '../lib/chartSetup';
+import { getBaseChartOptions, addZoomOptions } from '../lib/chartSetup';
 import { getThemeContext } from '../utils/themes';
 import { useTheme } from '../utils/useTheme';
 
@@ -8,9 +8,10 @@ interface MetricBarChartProps {
   labels: string[];
   values: number[];
   label: string;
+  zoom?: boolean;
 }
 
-export function MetricBarChart({ labels, values, label }: MetricBarChartProps) {
+export function MetricBarChart({ labels, values, label, zoom }: MetricBarChartProps) {
   const { theme } = useTheme();
   const { palette, surface } = getThemeContext(theme);
   const data: ChartData<'bar'> = {
@@ -28,10 +29,11 @@ export function MetricBarChart({ labels, values, label }: MetricBarChartProps) {
   };
 
   const base = getBaseChartOptions(surface);
-  const options = {
+  let options: Record<string, unknown> = {
     ...base,
     plugins: { ...base.plugins, legend: { display: false } },
   };
+  if (zoom) options = addZoomOptions(options);
 
   return <Bar data={data} options={options as ChartOptions<'bar'>} />;
 }
