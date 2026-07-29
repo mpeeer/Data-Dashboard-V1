@@ -62,7 +62,11 @@ export default function App() {
     <div className="app-shell">
       <header className="topbar">
         <div className="brand">
-          lumen
+          <svg className="brand-logo" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
+            <circle cx="8" cy="8" r="2.5" fill="currentColor" />
+          </svg>
+          <span className="brand-text">lumen</span>
           {parsed && <span className="brand-sub"> · {parsed.fileName}</span>}
         </div>
         {loaded && (
