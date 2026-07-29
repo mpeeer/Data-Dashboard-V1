@@ -15,7 +15,10 @@ const ACCEPT = {
   'application/json': ['.json'],
 };
 
+const FILE_ACCEPT = '.csv,.tsv,.txt,.json,text/csv,text/tab-separated-values,text/plain,application/json';
+
 export function FileUpload({ onFile, onFolder, busy, children }: FileUploadProps) {
+  const fileRef = useRef<HTMLInputElement>(null);
   const folderRef = useRef<HTMLInputElement>(null);
 
   const handleDrop = useCallback(
@@ -25,13 +28,22 @@ export function FileUpload({ onFile, onFolder, busy, children }: FileUploadProps
     [onFile],
   );
 
-  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: handleDrop,
     accept: ACCEPT,
     multiple: false,
     noClick: true,
     noKeyboard: true,
   });
+
+  const onFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const f = e.target.files?.[0];
+      if (f) onFile(f);
+      e.target.value = '';
+    },
+    [onFile],
+  );
 
   const onFolderChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,15 +62,31 @@ export function FileUpload({ onFile, onFolder, busy, children }: FileUploadProps
           className: `dropzone${isDragActive ? ' is-dragging' : ''}`,
         })}
       >
-        <input {...getInputProps()} />
+        {/* React-dropzone needs this for drag-and-drop to work.
+            Positioned off-screen so it never intercepts clicks. */}
+        <input {...getInputProps({ style: { position: 'fixed', left: '-9999px' } })} />
 
         <h1>{isDragActive ? 'Release to load' : 'Load a data file'}</h1>
         <p>Drop a CSV, TSV, TXT, or JSON file anywhere in this box.</p>
 
         <div className="browse-row">
-          <button type="button" className="btn btn-primary" onClick={open}>
-            {busy ? 'Loading\u2026' : 'Choose file\u2026'}
-          </button>
+          <span className="file-picker-wrap">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => fileRef.current?.click()}
+            >
+              {busy ? 'Loading\u2026' : 'Choose file\u2026'}
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept={FILE_ACCEPT}
+              className="file-input-hidden"
+              onChange={onFileChange}
+              aria-label="Choose file"
+            />
+          </span>
           <span className="folder-picker-wrap">
             <button
               type="button"

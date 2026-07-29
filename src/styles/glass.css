@@ -962,6 +962,7 @@ table.data-table {
   cursor: pointer;
 }
 
+.file-picker-wrap,
 .folder-picker-wrap {
   position: relative;
   display: inline-flex;
