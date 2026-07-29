@@ -58,16 +58,7 @@ function parseDelimited(text: string, fileName: string): ParsedFile {
 
   // Build column-oriented records. If a row is short, pad with null.
   // If a row is long, truncate extras (rare, but possible).
-  const seen = new Set<string>();
-  const uniqueHeader = header.map((h) => {
-    let name = h;
-    let n = 2;
-    while (seen.has(name)) {
-      name = `${h}_${n++}`;
-    }
-    seen.add(name);
-    return name;
-  });
+  const uniqueHeader = dedupeHeaders(header);
 
   const rows: Row[] = dataRows.map((cells) => {
     const obj: Row = {};
@@ -148,4 +139,135 @@ export function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
   return `${(n / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+// ── lightweight file preview (fast header + row count) ──────────────
+
+export interface FilePreview {
+  fileName: string;
+  fileSize: number;
+  columns: string[];
+  rowCount: number;
+}
+
+/** Quick peek at a file's structure without full cell parsing. Returns
+ *  column names and approximate row count in a fraction of the time of
+ *  a full parse — ideal for folder file listings. */
+export async function previewFile(file: File): Promise<FilePreview> {
+  if (file.size > MAX_BYTES) {
+    return { fileName: file.name, fileSize: file.size, columns: [], rowCount: 0 };
+  }
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  if (!TEXT_EXT.includes(ext)) {
+    return { fileName: file.name, fileSize: file.size, columns: [], rowCount: 0 };
+  }
+
+  const text = await readAsText(file);
+
+  if (ext === 'json') {
+    return previewJson(text, file.name, file.size);
+  }
+  return previewDelimited(text, file.name, file.size);
+}
+
+function previewDelimited(text: string, fileName: string, fileSize: number): FilePreview {
+  // Fast preview: count newlines for rows, extract first line for headers.
+  // Avoids Papa Parse overhead — stays O(n) string scanning.
+  const lines = text.split('\n');
+
+  // Find first non-empty line for header
+  let headerLine = '';
+  let rowCount = 0;
+  let foundHeader = false;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed === '') continue;
+    if (!foundHeader) {
+      headerLine = trimmed;
+      foundHeader = true;
+    } else {
+      rowCount++;
+    }
+  }
+
+  if (!foundHeader || headerLine === '') {
+    return { fileName, fileSize, columns: [], rowCount: 0 };
+  }
+
+  const columns = dedupeHeaders(
+    smartSplit(headerLine).map((h, i) => (h && h.trim()) || `column_${i + 1}`),
+  );
+
+  return { fileName, fileSize, columns, rowCount };
+}
+
+/** Shared header deduplication (used by both preview and full parse). */
+function dedupeHeaders(header: string[]): string[] {
+  const seen = new Set<string>();
+  return header.map((h) => {
+    let name = h;
+    let n = 2;
+    while (seen.has(name)) name = `${h}_${n++}`;
+    seen.add(name);
+    return name;
+  });
+}
+
+/** Smart split that handles quoted fields (CSV-aware). Does a fast
+ *  single-pass parse of one line without the Papa Parse dependency. */
+function smartSplit(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += ch;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ',' || ch === '\t' || ch === ';' || ch === '|') {
+        result.push(current);
+        current = '';
+      } else {
+        current += ch;
+      }
+    }
+  }
+  result.push(current);
+  return result;
+}
+
+function previewJson(text: string, fileName: string, fileSize: number): FilePreview {
+  try {
+    const parsed = JSON.parse(text);
+    let arr: unknown[];
+    if (Array.isArray(parsed)) {
+      arr = parsed;
+    } else if (parsed && typeof parsed === 'object') {
+      const obj = parsed as Record<string, unknown>;
+      const candidate = obj.rows ?? obj.data ?? obj.records;
+      arr = Array.isArray(candidate) ? candidate : [];
+    } else {
+      arr = [];
+    }
+    const colSet = new Set<string>();
+    for (const item of arr) {
+      if (item && typeof item === 'object') {
+        Object.keys(item as Record<string, unknown>).forEach((k) => colSet.add(k));
+      }
+    }
+    return { fileName, fileSize, columns: Array.from(colSet), rowCount: arr.length };
+  } catch {
+    return { fileName, fileSize, columns: [], rowCount: 0 };
+  }
 }
