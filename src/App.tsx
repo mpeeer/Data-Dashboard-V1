@@ -29,7 +29,7 @@ export default function App() {
         setToast({ msg: `${file.name} parsed but contained no rows.`, kind: 'info' });
       } else {
         setToast({
-          msg: `Loaded ${result.rows.length.toLocaleString()} rows · ${result.columns.length} columns from ${file.name}`,
+          msg: `${result.rows.length.toLocaleString()} rows · ${result.columns.length} columns`,
           kind: 'info',
         });
       }
@@ -38,8 +38,7 @@ export default function App() {
       setToast({ msg, kind: 'error' });
     } finally {
       setBusy(false);
-      // Auto-dismiss toasts.
-      window.setTimeout(() => setToast(null), 4500);
+      window.setTimeout(() => setToast(null), 3500);
     }
   }, []);
 
@@ -57,87 +56,66 @@ export default function App() {
   const loaded = parsed && parsed.rows.length > 0;
 
   return (
-    <>
-      <div className="bg-canvas">
-        <div className="orb-extra" />
-      </div>
-
-      <div className="app-shell">
-        <header className="glass topbar">
-          <div className="brand">
-            <div className="brand-mark" />
-            <span className="brand-name">Lumen</span>
-            <span style={{ color: 'var(--text-mute)', fontSize: 12, marginLeft: 4, fontWeight: 500 }}>
-              Data Dashboard
+    <div className="app-shell">
+      <header className="topbar">
+        <div className="brand">
+          lumen
+          {parsed && <span className="brand-sub"> · {parsed.fileName}</span>}
+        </div>
+        <div className="topbar-actions">
+          {parsed && (
+            <span className="file-chip">
+              {formatBytes(parsed.fileSize)}
+              <button type="button" aria-label="Clear" onClick={onReset}>
+                ×
+              </button>
             </span>
-          </div>
-          <div className="topbar-actions">
-            {parsed && (
-              <span className="file-chip">
-                {parsed.fileName} · {formatBytes(parsed.fileSize)}
-                <button type="button" aria-label="Clear" onClick={onReset}>
-                  ×
-                </button>
-              </span>
-            )}
-            {parsed && (
-              <UploadButton onFile={onFile} busy={busy} />
-            )}
-          </div>
-        </header>
+          )}
+          {parsed && <UploadButton onFile={onFile} busy={busy} />}
+        </div>
+      </header>
 
-        {!loaded && <FileUpload onFile={onFile} busy={busy} />}
+      {!loaded && <FileUpload onFile={onFile} busy={busy} />}
 
-        {loaded && (
-          <div className="dashboard">
-            <DataOutline
+      {loaded && (
+        <div className="dashboard">
+          <DataOutline
+            columns={columnStats}
+            totalRows={parsed.rows.length}
+            selected={selected}
+            onSelect={setSelected}
+          />
+          <main className="main">
+            <StatsCards columns={columnStats} totalRows={parsed.rows.length} />
+            <ChartsPanel
+              rows={parsed.rows}
               columns={columnStats}
-              totalRows={parsed.rows.length}
               selected={selected}
-              onSelect={setSelected}
             />
-            <main className="main">
-              <StatsCards columns={columnStats} totalRows={parsed.rows.length} />
-              <ChartsPanel
-                rows={parsed.rows}
-                columns={columnStats}
-                selected={selected}
-              />
+            <section>
               <DataPreview parsed={parsed} columns={columnStats} />
-            </main>
-          </div>
-        )}
-      </div>
+            </section>
+          </main>
+        </div>
+      )}
 
       {toast && (
-        <div className={`toast is-${toast.kind}`} role="status">
+        <div className={`toast toast-${toast.kind}`} role="status">
           {toast.msg}
         </div>
       )}
-    </>
+    </div>
   );
 }
 
 function UploadButton({ onFile, busy }: { onFile: (f: File) => void; busy: boolean }) {
   return (
-    <label className="btn" style={{ position: 'relative', cursor: 'pointer' }}>
-      {busy ? (
-        <>
-          <span className="spinner" />
-          Loading…
-        </>
-      ) : (
-        'Replace file'
-      )}
+    <label className="btn">
+      {busy ? 'Loading…' : 'Replace file'}
       <input
         type="file"
         accept=".csv,.tsv,.txt,.json,text/csv,text/tab-separated-values,text/plain,application/json"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          opacity: 0,
-          cursor: 'pointer',
-        }}
+        className="file-input-hidden"
         onChange={(e) => {
           const f = e.target.files?.[0];
           if (f) onFile(f);

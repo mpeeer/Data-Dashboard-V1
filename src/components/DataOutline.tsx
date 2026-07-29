@@ -10,79 +10,45 @@ interface DataOutlineProps {
 }
 
 export function DataOutline({ columns, totalRows, selected, onSelect }: DataOutlineProps) {
-  const grouped = useMemo(() => {
-    const nums = columns.filter((c) => c.type === 'number');
-    const dates = columns.filter((c) => c.type === 'date');
-    const strings = columns.filter((c) => c.type === 'string');
+  const counts = useMemo(() => {
+    const nums = columns.filter((c) => c.type === 'number').length;
+    const dates = columns.filter((c) => c.type === 'date').length;
+    const strings = columns.filter((c) => c.type === 'string').length;
     return { nums, dates, strings };
   }, [columns]);
 
   return (
-    <aside className="glass-strong sidebar">
-      <h2>Data Outline</h2>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 8,
-          marginBottom: 18,
-          fontSize: 12,
-        }}
-      >
-        <Mini label="Rows" value={totalRows.toLocaleString()} />
-        <Mini label="Columns" value={columns.length.toString()} />
-        <Mini label="Types" value={`${grouped.nums.length}N · ${grouped.dates.length}D · ${grouped.strings.length}S`} />
+    <aside className="sidebar">
+      <div className="sidebar-head">
+        <div>
+          <strong>{totalRows.toLocaleString()}</strong>
+          <span>rows</span>
+        </div>
+        <div>
+          <strong>{columns.length}</strong>
+          <span>
+            cols \u00b7 {counts.nums}N {counts.dates}D {counts.strings}S
+          </span>
+        </div>
       </div>
 
+      <div className="col-label">Columns</div>
       <div className="col-list">
         {columns.map((col) => {
           const isActive = selected === col.name;
+          const meta = formatMeta(col);
           return (
             <button
               key={col.name}
               type="button"
-              className={`col-card${isActive ? ' is-active' : ''}`}
+              className={`col-row${isActive ? ' is-active' : ''}`}
               onClick={() => onSelect(isActive ? null : col.name)}
-              style={{
-                outline: 'none',
-                textAlign: 'left',
-                font: 'inherit',
-                color: 'inherit',
-                width: '100%',
-              }}
             >
-              <div className="col-name">
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {col.name}
-                </span>
-                <span className={`type-badge is-${col.type}`}>{col.type.slice(0, 3)}</span>
+              <div className="col-top">
+                <span className="col-name">{col.name}</span>
+                <span className="col-type">{col.type === 'number' ? 'num' : col.type === 'date' ? 'date' : 'str'}</span>
               </div>
-              <div className="col-stats">
-                {col.type === 'number' && col.numeric && (
-                  <>
-                    mean <strong>{formatNumber(col.numeric.mean)}</strong> · range{' '}
-                    <strong>
-                      {formatNumber(col.numeric.min)} – {formatNumber(col.numeric.max)}
-                    </strong>
-                  </>
-                )}
-                {col.type === 'date' && col.date && (
-                  <>
-                    {col.date.min.toISOString().slice(0, 10)} →{' '}
-                    {col.date.max.toISOString().slice(0, 10)} (
-                    {col.date.spanDays.toLocaleString()}d)
-                  </>
-                )}
-                {col.type === 'string' && (
-                  <>
-                    unique <strong>{col.uniqueCount}</strong>
-                    {col.nullCount > 0 && <> · nulls <strong>{col.nullCount}</strong></>}
-                  </>
-                )}
-              </div>
-              {col.samples.length > 0 && (
-                <div className="col-samples">{col.samples.join(' · ')}</div>
-              )}
+              <div className="col-meta">{meta}</div>
             </button>
           );
         })}
@@ -91,28 +57,13 @@ export function DataOutline({ columns, totalRows, selected, onSelect }: DataOutl
   );
 }
 
-function Mini({ label, value }: { label: string; value: string }) {
-  return (
-    <div
-      style={{
-        background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 10,
-        padding: '8px 10px',
-      }}
-    >
-      <div
-        style={{
-          fontSize: 10,
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-          color: 'var(--text-mute)',
-          fontWeight: 600,
-        }}
-      >
-        {label}
-      </div>
-      <div style={{ fontWeight: 600, marginTop: 2 }}>{value}</div>
-    </div>
-  );
+function formatMeta(col: ColumnStats): string {
+  if (col.type === 'number' && col.numeric) {
+    return `mean ${formatNumber(col.numeric.mean)} \u00b7 range ${formatNumber(col.numeric.min)}\u2013${formatNumber(col.numeric.max)}`;
+  }
+  if (col.type === 'date' && col.date) {
+    return `${col.date.min.toISOString().slice(0, 10)} \u2192 ${col.date.max.toISOString().slice(0, 10)}`;
+  }
+  const nullPart = col.nullCount > 0 ? ` \u00b7 nulls ${col.nullCount}` : '';
+  return `unique ${col.uniqueCount}${nullPart}`;
 }

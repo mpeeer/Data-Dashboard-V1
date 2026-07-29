@@ -13,7 +13,6 @@ import {
   type ChartOptions,
 } from 'chart.js';
 
-// Register everything once so we don't repeat in every component.
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -27,61 +26,56 @@ ChartJS.register(
   Filler
 );
 
-/** Shared visual style for charts on a glass background. */
 export const chartColors = {
-  text: 'rgba(244, 245, 251, 0.86)',
-  textMute: 'rgba(244, 245, 251, 0.55)',
-  grid: 'rgba(255, 255, 255, 0.07)',
-  gridStrong: 'rgba(255, 255, 255, 0.14)',
+  text: 'rgba(237, 237, 237, 0.85)',
+  textMute: 'rgba(115, 115, 115, 0.9)',
+  grid: 'rgba(255, 255, 255, 0.04)',
   palette: [
-    'rgba(169, 156, 255, 0.85)',
-    'rgba(255, 155, 214, 0.85)',
-    'rgba(92, 225, 255, 0.85)',
-    'rgba(255, 184, 107, 0.85)',
-    'rgba(109, 240, 198, 0.85)',
-    'rgba(255, 122, 138, 0.85)',
-    'rgba(199, 167, 255, 0.85)',
-    'rgba(255, 215, 130, 0.85)',
+    'rgba(96, 165, 250, 0.85)',   // blue
+    'rgba(52, 211, 153, 0.85)',   // green
+    'rgba(251, 191, 36, 0.85)',    // amber
+    'rgba(248, 113, 113, 0.85)',  // red
+    'rgba(167, 139, 250, 0.85)',  // violet
+    'rgba(45, 212, 191, 0.85)',   // teal
   ],
 };
 
 export const baseChartOptions: ChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
-  animation: { duration: 450, easing: 'easeOutCubic' },
+  animation: { duration: 200, easing: 'easeOutCubic' },
   plugins: {
     legend: {
       position: 'top',
       align: 'end',
       labels: {
-        color: chartColors.text,
-        boxWidth: 10,
-        boxHeight: 10,
-        usePointStyle: true,
-        pointStyle: 'circle',
-        font: { family: 'Inter, system-ui', size: 11 },
+        color: chartColors.textMute,
+        boxWidth: 8,
+        boxHeight: 8,
+        usePointStyle: false,
+        font: { family: 'ui-monospace, SF Mono, Menlo, monospace', size: 10 },
       },
     },
     tooltip: {
-      backgroundColor: 'rgba(20, 22, 45, 0.92)',
-      borderColor: 'rgba(255, 255, 255, 0.18)',
+      backgroundColor: 'rgba(20, 20, 20, 0.95)',
+      borderColor: 'rgba(255, 255, 255, 0.08)',
       borderWidth: 1,
-      padding: 10,
+      padding: 8,
       titleColor: chartColors.text,
       bodyColor: chartColors.text,
-      cornerRadius: 8,
-      titleFont: { family: 'Inter, system-ui', size: 12, weight: 'bold' },
-      bodyFont: { family: 'Inter, system-ui', size: 12 },
+      cornerRadius: 4,
+      titleFont: { family: 'system-ui', size: 11, weight: 'normal' },
+      bodyFont: { family: 'ui-monospace, SF Mono, Menlo, monospace', size: 11 },
     },
   },
   scales: {
     x: {
-      ticks: { color: chartColors.textMute, font: { family: 'Inter, system-ui', size: 11 } },
-      grid: { color: chartColors.grid, drawTicks: false },
+      ticks: { color: chartColors.textMute, font: { family: 'system-ui', size: 10 } },
+      grid: { color: chartColors.grid, display: false },
       border: { display: false },
     },
     y: {
-      ticks: { color: chartColors.textMute, font: { family: 'Inter, system-ui', size: 11 } },
+      ticks: { color: chartColors.textMute, font: { family: 'ui-monospace, SF Mono, Menlo, monospace', size: 10 } },
       grid: { color: chartColors.grid, drawTicks: false },
       border: { display: false },
     },

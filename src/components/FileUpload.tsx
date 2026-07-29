@@ -13,26 +13,6 @@ const ACCEPT = {
   'application/json': ['.json'],
 };
 
-function UploadIcon() {
-  return (
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 16V4" />
-      <path d="m6 10 6-6 6 6" />
-      <path d="M5 20h14" />
-    </svg>
-  );
-}
-
-function ClickIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 3l14 9-6 2-2 6Z" />
-    </svg>
-  );
-}
-
 export function FileUpload({ onFile, busy }: FileUploadProps) {
   const handleDrop = useCallback(
     (accepted: File[]) => {
@@ -53,40 +33,21 @@ export function FileUpload({ onFile, busy }: FileUploadProps) {
     <section className="hero">
       <div
         {...getRootProps({
-          className: `glass dropzone${isDragActive ? ' is-dragging' : ''}`,
+          className: `dropzone${isDragActive ? ' is-dragging' : ''}`,
         })}
       >
         <input {...getInputProps()} />
 
-        <div className="dropzone-icon" aria-hidden="true">
-          <UploadIcon />
-        </div>
-
-        <h1>Drop your data here</h1>
-        <p>
-          Lumen turns any CSV, TSV, TXT, or JSON file into a clean dashboard — no setup, no
-          configuration, no fluff. Drop a file to begin.
-        </p>
+        <h1>{isDragActive ? 'Release to load' : 'Load a data file'}</h1>
+        <p>Drop a CSV, TSV, TXT, or JSON file anywhere in this box.</p>
 
         <div className="browse-row">
           <button type="button" className="btn btn-primary" onClick={open}>
-            {busy ? (
-              <>
-                <span className="spinner" />
-                Reading…
-              </>
-            ) : (
-              <>
-                <ClickIcon />
-                <span style={{ marginLeft: 6 }}>Choose a file</span>
-              </>
-            )}
+            {busy ? 'Loading\u2026' : 'Choose file\u2026'}
           </button>
         </div>
 
-        <div className="hint">
-          Supports <kbd>.csv</kbd> <kbd>.tsv</kbd> <kbd>.txt</kbd> <kbd>.json</kbd> · max 50 MB
-        </div>
+        <div className="hint">.csv  .tsv  .txt  .json  \u00b7  max 50 MB</div>
       </div>
     </section>
   );

@@ -8,8 +8,6 @@ interface StatsCardsProps {
 
 export function StatsCards({ columns, totalRows }: StatsCardsProps) {
   const nums = columns.filter((c) => c.type === 'number');
-  const dates = columns.filter((c) => c.type === 'date');
-  const strings = columns.filter((c) => c.type === 'string');
 
   // Top numeric columns by stdev (most interesting first).
   const topNums = [...nums]
@@ -20,7 +18,7 @@ export function StatsCards({ columns, totalRows }: StatsCardsProps) {
     {
       label: 'Rows',
       value: totalRows.toLocaleString(),
-      sub: `${columns.length} columns · ${nums.length} numeric · ${dates.length} date · ${strings.length} text`,
+      sub: `${columns.length} columns`,
     },
   ];
 
@@ -29,14 +27,14 @@ export function StatsCards({ columns, totalRows }: StatsCardsProps) {
     cards.push({
       label: `Mean of ${n.name}`,
       value: formatNumber(stat.mean),
-      sub: `σ ${formatNumber(stat.stdev)} · range ${formatNumber(stat.min)}–${formatNumber(stat.max)}`,
+      sub: `range ${formatNumber(stat.min)}\u2013${formatNumber(stat.max)}`,
     });
   }
 
   return (
     <div className="summary-row">
       {cards.map((c, i) => (
-        <div key={i} className="glass stat-card">
+        <div key={i} className="stat-card">
           <div className="stat-label">{c.label}</div>
           <div className="stat-value">{c.value}</div>
           {c.sub && <div className="stat-sub">{c.sub}</div>}

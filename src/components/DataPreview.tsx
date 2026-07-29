@@ -15,17 +15,18 @@ export function DataPreview({ parsed, columns }: DataPreviewProps) {
   const total = parsed.rows.length;
 
   return (
-    <div className="glass preview-card">
-      <h3>Data Preview</h3>
-      <p>
-        Showing first {rows.length.toLocaleString()} of {total.toLocaleString()} rows ·{' '}
-        {cols.length} columns
-      </p>
+    <>
+      <div className="preview-head">
+        <h2>Data</h2>
+        <span>
+          first {rows.length.toLocaleString()} of {total.toLocaleString()} rows \u00b7 {cols.length} columns
+        </span>
+      </div>
       <div className="table-wrap">
         <table className="data-table">
           <thead>
             <tr>
-              <th style={{ width: 40, color: 'var(--text-mute)' }}>#</th>
+              <th className="col-index">#</th>
               {cols.map((c) => (
                 <th key={c}>{c}</th>
               ))}
@@ -34,11 +35,12 @@ export function DataPreview({ parsed, columns }: DataPreviewProps) {
           <tbody>
             {rows.map((r, i) => (
               <tr key={i}>
-                <td style={{ color: 'var(--text-mute)' }}>{i + 1}</td>
+                <td className="col-index">{i + 1}</td>
                 {cols.map((c) => {
                   const v = r[c];
                   const type = typeByCol.get(c);
-                  const display = v === null || v === undefined || v === '' ? '–' : String(v);
+                  const display =
+                    v === null || v === undefined || v === '' ? '\u2013' : String(v);
                   const cls =
                     type === 'number' ? 'is-num' : type === 'date' ? 'is-date' : '';
                   return (
@@ -51,7 +53,7 @@ export function DataPreview({ parsed, columns }: DataPreviewProps) {
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={cols.length + 1} style={{ textAlign: 'center', color: 'var(--text-mute)' }}>
+                <td colSpan={cols.length + 1} className="empty-row">
                   No data rows.
                 </td>
               </tr>
@@ -59,6 +61,6 @@ export function DataPreview({ parsed, columns }: DataPreviewProps) {
           </tbody>
         </table>
       </div>
-    </div>
+    </>
   );
 }
