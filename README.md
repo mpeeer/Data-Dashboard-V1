@@ -1,230 +1,331 @@
-# Lumen — Data Dashboard
+<!-- LUMEN — DATA DASHBOARD -->
+<p align="center">
+  <img src="public/icon.svg" alt="Lumen logo" width="80" height="80" />
+</p>
 
-A clean, **glassmorphism** data dashboard that turns any CSV, TSV, TXT, or JSON file into a structured dashboard in one click. **No AI filler, no setup, no signup** — just drop a file and read the data.
+<h1 align="center">Lumen — Data Dashboard</h1>
 
-> *“If you can see the data, you can understand it.”*
+<p align="center">
+  <strong>Instant, client-side data exploration.</strong><br />
+  Drop a CSV, TSV, TXT, or JSON file and get structured visualizations — no servers, no sign-up, no configuration.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" />
+  <img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen" alt="Node >= 18" />
+</p>
+
+<p align="center">
+  <img src="public/screenshot.png" alt="Lumen dashboard screenshot" width="800" />
+</p>
 
 ---
 
-## ✨ Features
+## Table of Contents
 
-- **File-first input** — drag-drop or browse for `csv`, `tsv`, `txt`, or `json` (delimiter is auto-detected)
-- **Smart column detection** — numbers, dates, and text columns inferred per type with statistics
-- **Auto-generated charts** — histograms, category breakdowns, time series, mean-by-category bars, and a share doughnut
-- **Data outline sidebar** — column types, unique counts, mean/range, sample values
-- **Focused mode** — click any column in the sidebar to filter every chart to it
-- **Scrollable preview table** — first 50 typed rows at the bottom
-- **Modern glass UI** — frosted surfaces, gradient orbs, animated backdrop, Inter typography
-- **Installable PWA** — adds to desktop / home screen as a standalone app
-- **Zero backend** — all parsing happens in your browser; your data never leaves your machine
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Supported File Formats](#supported-file-formats)
+- [How It Works](#how-it-works)
+- [Export](#export)
+- [Theming](#theming)
+- [Deployment](#deployment)
+  - [GitHub Pages](#github-pages)
+  - [Desktop App (PWA)](#desktop-app-pwa)
+  - [Native Binary (Tauri)](#native-binary-tauri)
+- [Project Structure](#project-structure)
+- [Technology Stack](#technology-stack)
+- [Development](#development)
+- [License](#license)
 
 ---
 
-## 🚀 Quick start
+## Features
 
-Requires **Node.js 18+** (tested on 20 and 24).
+### Data Input
+- **Drag-and-drop** or **file-browse** for `.csv`, `.tsv`, `.txt`, and `.json` files.
+- Automatic delimiter detection — no manual configuration required.
+- 50 MB file size cap; all parsing runs locally in the browser.
+
+### Smart Column Analysis
+Each column is inspected and classified as **numeric**, **date**, or **text** using a configurable 70 % threshold. Statistics computed per column include:
+
+| Numeric              | Date                    | Text                     |
+| -------------------- | ----------------------- | ------------------------ |
+| Mean, median, stdev  | Earliest / latest dates | Unique count             |
+| Min / max / range    | Day span                | Top-N category frequency |
+| Null count           | Null count              | Null count               |
+
+### Auto-Generated Visualizations
+The dashboard automatically renders up to 5 histograms, 3 category breakdowns, 1 time-series line, 1 mean-by-category bar, and 1 doughnut chart:
+
+- **Histogram** — numeric distribution with 10 equal-width bins.
+- **Category Bar Chart** — horizontal breakdown of top-N string values.
+- **Time-Series Line** — date × numeric trend over time.
+- **Metric Bar Chart** — mean of a numeric column grouped by category.
+- **Doughnut Chart** — proportional share of the top string column.
+
+### Interactive Exploration
+- **Data Outline sidebar** — lists every column with its type, unique count, mean, range, and sample values.
+- **Focus Mode** — click any column to filter all charts and statistics to that column.
+- **Scrollable Data Preview** — the first 50 rows formatted as a paginated table.
+
+### Statistical Insights Engine
+A built-in, deterministic insight engine analyzes every dataset and produces factual observations, including:
+
+- Per-column summary statistics.
+- Top-5 category distributions with percentages.
+- **Pearson correlation** coefficients between numeric column pairs (reported for |r| ≥ 0.5).
+- Date-range spans and trend direction with percentage change.
+- Row-level extremes (highest and lowest values per numeric column).
+
+All insights are computed locally — no AI models, no external API calls.
+
+### Export
+Generate **PDF reports** directly from the dashboard:
+
+- **Report PDF** — a written findings document with embedded charts.
+- **Charts PDF** — a visual-only export of every rendered chart.
+
+Both outputs are generated client-side using `pdf-lib` and the Chart.js offscreen renderer. No data ever leaves your machine.
+
+### Theming
+Four preset color themes plus a **custom accent picker**:
+
+- `lumen` (default) — cool blue / green / amber.
+- `graphite` — neutral grayscale.
+- `paper` — light-mode with crisp contrast.
+- `ember` — warm orange / red / yellow.
+- **Custom** — choose any accent color via a color input; the full 6-color palette is derived automatically.
+
+Theme preference is persisted in `localStorage` per browser.
+
+### Modern Glass UI
+Frosted-glass surfaces, animated gradient orbs, and Inter typography. Fully responsive across desktop and tablet viewports.
+
+### Progressive Web App
+Installable on desktop and mobile home screens. Works offline once the service worker caches the application shell.
+
+---
+
+## Quick Start
+
+**Prerequisites:** Node.js 18 or later.
 
 ```bash
-# 1. install
+# 1. Install dependencies
 npm install
 
-# 2. develop (hot reload on http://localhost:5173)
+# 2. Start the development server (hot reload on http://localhost:5173)
 npm run dev
 
-# 3. try it
-#    open http://localhost:5173
-#    drag sample-data.csv onto the window, or click "Choose a file"
+# 3. Open http://localhost:5173 and drop sample-data.csv onto the window,
+#    or click "Choose a file" to browse.
 ```
 
-To produce a production build in `dist/`:
+To create and preview a production build:
 
 ```bash
 npm run build
-npm run preview      # serves the build locally on http://localhost:4173
+npm run preview   # serves dist/ on http://localhost:4173
 ```
 
 ---
 
-## 📂 Supported files
+## Supported File Formats
 
-| Extension | What it accepts                                              |
-| --------- | ------------------------------------------------------------ |
-| `.csv`    | Comma-separated values                                       |
-| `.tsv`    | Tab-separated values                                         |
-| `.txt`    | Any delimited text (PapaParse auto-detects delimiter)        |
-| `.json`   | Top-level array of objects, *or* `{ "rows" \| "data": [] }` |
+| Extension | Description                                                    |
+| --------- | -------------------------------------------------------------- |
+| `.csv`    | Comma-separated values.                                        |
+| `.tsv`    | Tab-separated values.                                          |
+| `.txt`    | Any delimited text — PapaParse auto-detects the delimiter.     |
+| `.json`   | Top-level array of objects, or `{ "rows" \| "data": […] }`.   |
 
-A `sample-data.csv` is included (60 rows of fictional Q1–Q2 product sales) so you can poke at the dashboard immediately.
+A **`sample-data.csv`** is included (60 rows of fictional Q1–Q2 product sales) for immediate testing.
 
-Limits: **50 MB** file size cap, column type detection ≥ 70 % of values match the inferred type, up to **5** numeric histograms and **3** category breakdowns auto-rendered.
+**Limits:** 50 MB maximum file size. Up to 5 numeric histograms and 3 category breakdowns are rendered automatically. Column type detection requires ≥ 70 % of non-null values to match the inferred type (adjustable in `src/utils/columnAnalyzer.ts`).
 
 ---
 
-## 🌐 Deploy to GitHub Pages
+## How It Works
 
-This repo ships with `.github/workflows/deploy.yml` and a `public/.nojekyll` marker (so GitHub Pages skips its default Jekyll processing of `_`-prefixed paths). Push to `main` and the dashboard is live at:
+When a file is loaded, Lumen walks every column once using the following chart-selection rules:
+
+1. **Numeric columns** → histogram (up to 5 rendered).
+2. **String columns** → horizontal category bar + doughnut on the highest-cardinality column (up to 3 bars).
+3. **Date + Numeric columns** → time-series line chart.
+4. **String + Numeric columns** → vertical bar of mean values by category.
+
+Clicking any column in the sidebar enters **Focus Mode**, filtering all charts and statistics to that column's data.
+
+---
+
+## Export
+
+Click **Report PDF** or **Charts PDF** in the top bar to download.
+
+| Export        | Contents                                                                 |
+| ------------- | ------------------------------------------------------------------------ |
+| Report PDF    | Written findings (insights) followed by full-page chart figures.         |
+| Charts PDF    | One chart per page, with title, caption, and row count.                  |
+
+Both exports are generated entirely in the browser. Rendering uses an offscreen `<canvas>` element — charts are drawn, captured as PNG data URLs, and embedded into the PDF document.
+
+---
+
+## Theming
+
+Click the theme button in the top bar to open the picker. Choose from four presets or set a custom accent color. The selected theme updates all CSS custom properties and Chart.js palette colors immediately.
+
+---
+
+## Deployment
+
+### GitHub Pages
+
+This repository includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) and a `.nojekyll` marker for clean asset paths.
+
+**One-time setup:**
+
+1. Go to **Settings → Pages** in the repository.
+2. Set the source to **GitHub Actions**.
+3. Push to `main`.
+
+Every subsequent push triggers a build and deploys to:
 
 ```
 https://<owner>.github.io/<repo-name>/
 ```
 
-The action runs `npm run build` (Vite emits assets with relative `./assets/...` paths because of `base: './'` in `vite.config.ts`), uploads `dist/`, and Pages serves it. Rename the repo to anything and the same build keeps working — no path tweak needed.
+The Vite build uses `base: './'`, so relative asset paths work regardless of the repository name.
 
-### One-time setup
-
-1. Repo → **Settings → Pages**
-2. Source: **GitHub Actions**
-3. Push to `main`
-
-That’s it — every commit rebuilds and redeploys. The dashboard URL is shown at the bottom of the workflow run and on the repo home page.
-
-### Running the Pages build locally
+**Local Pages build:**
 
 ```bash
-npm run build      # static dist/ ready for any URL
-npm run serve      # serve dist/ on http://localhost:4173
+npm run build
+npm run serve   # serves dist/ on http://localhost:4173
 ```
 
----
+### Desktop App (PWA)
 
-## 📦 Install as a desktop app (PWA)
+After deploying (or running `npm run preview`), open the URL in Chrome or Edge:
 
-The build is a Progressive Web App. After deploying (or running `npm run preview`), in Chrome or Edge:
+1. Click the **install icon** in the address bar (or *⋮ → Install Lumen*).
+2. Launch from the Start Menu, Dock, or Applications folder.
 
-1. Open the dashboard URL
-2. Click the **install icon** in the address bar (or *⋮ → Install Lumen*)
-3. Launch from your Start Menu / Dock / Applications folder
+The installed app runs standalone (no browser chrome) and caches the application shell for offline use.
 
-The installed app launches standalone (no browser chrome), remembers your data per tab session, and works offline once the service worker has cached the shell.
+### Native Binary (Tauri)
 
----
+For a lightweight (~10 MB) native executable that uses the system WebView (no bundled Chromium):
 
-## 🪟 Wrap as a real native executable (optional)
+> **Prerequisites:** [Rust toolchain](https://rustup.rs) and Tauri's [platform-specific dependencies](https://tauri.app/start/prerequisites/).
 
-This repo ships only as a web app. If you want a **single-file native binary** (~ 10 MB, using the system WebView instead of bundling Chromium like Electron does), add [Tauri](https://tauri.app/) yourself:
-
-> One-time setup on each dev machine: install the [Rust toolchain](https://rustup.rs) and the Tauri prerequisites for your OS. Tauri scaffolding is **not** included in this repo — it must be added per project.
-
-From the project root, with the dev server stopped:
+From the project root (with the dev server stopped):
 
 ```bash
 npm install --save-dev @tauri-apps/cli@latest
 npx tauri init
 ```
 
-When `npx tauri init` asks which command to run before `tauri dev` / `tauri build`, point it at the Vite preview/build scripts:
+Use these answers when prompted by `tauri init`:
 
-| Prompt                                | Answer                                |
-| ------------------------------------- | ------------------------------------- |
-| dev command (beforeDevCommand)        | `npm run dev`                         |
-| build command (beforeBuildCommand)    | `npm run build`                       |
-| frontend dist directory (frontendDist)| `../dist` (one level up from `src-tauri`) |
-| dev server URL (devUrl)               | `http://localhost:5173`               |
+| Prompt                                  | Answer                                  |
+| --------------------------------------- | --------------------------------------- |
+| Dev command (`beforeDevCommand`)        | `npm run dev`                           |
+| Build command (`beforeBuildCommand`)    | `npm run build`                         |
+| Frontend dist directory (`frontendDist`)| `../dist`                               |
+| Dev server URL (`devUrl`)               | `http://localhost:5173`                 |
 
-Then add to your `package.json` `scripts`:
+Then add to `package.json` scripts:
 
-```jsonc
+```json
 "tauri:dev":   "tauri dev",
 "tauri:build": "npm run build && tauri build"
 ```
 
 ```bash
-npm run tauri:build   # writes a real .exe (Windows), .dmg (macOS), .AppImage / .deb (Linux)
+npm run tauri:build   # outputs .exe (Windows), .dmg (macOS), or .AppImage / .deb (Linux)
 ```
 
-The Tauri shell will load the static `dist/` output. Because Lumen has **no network calls**, the small bundle ships without any external traffic.
-
-### Alternatives
-
-- **Electron** — heavier (~150 MB), ships its own Chromium, easiest mental model: `npm i -D electron electron-builder` plus a tiny `main.js`.
-- **pkg / Node SEA** — wrap the static site with `npx serve` to get a cross-platform JS launcher.
-
-Each of these adds native toolchain weight; Tauri is the lightest option that produces a real binary.
+**Alternatives:** Electron (heavier, ~150 MB) or Node SEA for a JS-based launcher.
 
 ---
 
-## 🧰 Stack
-
-| Layer            | Library                                                  |
-| ---------------- | -------------------------------------------------------- |
-| Build / Dev      | [Vite 5](https://vitejs.dev)                             |
-| UI               | [React 18](https://react.dev) + [TypeScript 5](https://www.typescriptlang.org/) |
-| Charts           | [chart.js 4](https://www.chartjs.org) via react-chartjs-2|
-| File parsing     | [PapaParse 5](https://www.papaparse.com)                 |
-| Drop / browse    | [react-dropzone 14](https://react-dropzone.js.org)       |
-| PWA              | [vite-plugin-pwa 0.20](https://vite-pwa-org.netlify.app) |
-| Typography       | [Inter](https://rsms.me/inter/) (Google Fonts)           |
-| Theme            | Hand-rolled glassmorphism in `src/styles/glass.css`      |
-
-No CSS framework, no UI kit, no state library, **no AI-decorative code**.
-
----
-
-## 🧠 How the dashboard decides what to chart
-
-For each loaded dataset, Lumen walks the columns once:
-
-1. **Numbers** → a histogram (10 equal-width bins), up to 5 of them
-2. **Strings** → top-N category breakdown (horizontal bar) plus a share doughnut on the top column
-3. **Dates × Numbers** → sorted time-series line chart
-4. **Strings × Number** → top-N categories by mean (vertical bar) for the un-filtered view
-
-Type inference uses a **70 % threshold** per column (configurable in `src/utils/columnAnalyzer.ts`).
-
----
-
-## 🛠 Development
-
-```bash
-npm run dev         # vite dev server with HMR
-npm run typecheck   # tsc -b --noEmit
-npm run build       # production build → dist/
-npm run build:gh    # build with /Data-Dashboard-V1/ base path for Pages
-npm run serve       # vite preview of the production build
-```
-
-Project layout:
+## Project Structure
 
 ```
 src/
-├── App.tsx                          # top-level shell
-├── main.tsx                         # React entry
-├── lib/chartSetup.ts                # shared chart.js configuration
+├── App.tsx                    # Application shell and layout
+├── main.tsx                   # React entry point
+├── lib/
+│   └── chartSetup.ts          # Shared Chart.js registration and defaults
 ├── utils/
-│   ├── fileParser.ts                # CSV/TSV/TXT/JSON → rows + columns
-│   └── columnAnalyzer.ts            # per-column type detection + stats
+│   ├── fileParser.ts          # CSV / TSV / TXT / JSON parsing
+│   ├── columnAnalyzer.ts      # Column type inference and statistics
+│   ├── insights.ts            # Deterministic statistical insight engine
+│   ├── chartRender.ts         # Offscreen Chart.js → PNG renderer
+│   ├── pdfExport.ts           # PDF generation (report + charts)
+│   ├── themes.ts              # Theme definitions and palette derivation
+│   └── useTheme.ts            # Theme state hook with localStorage persistence
 ├── components/
-│   ├── FileUpload.tsx               # drag-drop / browse
-│   ├── DataOutline.tsx              # sidebar with column list
-│   ├── StatsCards.tsx               # top stats row
-│   ├── ChartsPanel.tsx              # auto-selects which charts to render
-│   ├── HistogramChart.tsx           # numeric distribution bar
-│   ├── CategoryBarChart.tsx         # horizontal category breakdown
-│   ├── MetricBarChart.tsx           # vertical aggregation bar
-│   ├── MetricLineChart.tsx          # time-series line
-│   ├── MetricDoughnut.tsx           # category share
-│   └── DataPreview.tsx              # scrollable first-50-rows table
-└── styles/glass.css                 # the glassmorphism theme
+│   ├── FileUpload.tsx         # Drag-and-drop / browse input
+│   ├── DataOutline.tsx        # Column list sidebar
+│   ├── StatsCards.tsx         # Summary statistics row
+│   ├── ChartsPanel.tsx        # Chart orchestration and layout
+│   ├── HistogramChart.tsx     # Numeric distribution
+│   ├── CategoryBarChart.tsx   # Horizontal category breakdown
+│   ├── MetricBarChart.tsx     # Vertical aggregation bar chart
+│   ├── MetricLineChart.tsx    # Time-series line chart
+│   ├── MetricDoughnut.tsx     # Category share doughnut
+│   ├── DataPreview.tsx        # Paginated data table
+│   ├── ExportMenu.tsx         # PDF export controls
+│   └── ThemePicker.tsx        # Theme selection popover
+└── styles/
+    └── glass.css              # Glassmorphism theme and layout
 
 public/
-└── icon.svg                         # brand mark / PWA icon
+└── icon.svg                   # Brand mark and PWA icon
 
 .github/workflows/
-└── deploy.yml                       # Pages auto-deploy
+└── deploy.yml                 # GitHub Pages auto-deploy workflow
 
-sample-data.csv                      # 60 rows of sales data
+sample-data.csv                 # 60 rows of fictional sales data
 ```
 
 ---
 
-## 📜 License
+## Technology Stack
 
-[MIT](./LICENSE) — Copyright (c) 2026 Jeremy. Do what you want, just keep the copyright notice.
+| Layer           | Library                                                      |
+| --------------- | ------------------------------------------------------------ |
+| Build tooling   | [Vite 5](https://vitejs.dev)                                 |
+| UI framework    | [React 18](https://react.dev) + [TypeScript 5](https://www.typescriptlang.org/) |
+| Charts          | [Chart.js 4](https://www.chartjs.org) via [react-chartjs-2](https://react-chartjs-2.js.org/) |
+| File parsing    | [PapaParse 5](https://www.papaparse.com)                     |
+| Drag-and-drop   | [react-dropzone 14](https://react-dropzone.js.org)           |
+| PDF generation  | [pdf-lib](https://pdf-lib.js.org)                            |
+| PWA support     | [vite-plugin-pwa](https://vite-pwa-org.netlify.app)          |
+| Typography      | [Inter](https://rsms.me/inter/) via Google Fonts             |
+| Styling         | Custom CSS (glassmorphism) — no framework dependency         |
 
-Edit the holder name on the first line of `LICENSE` if you'd like to claim it under a different name.
+No CSS framework, no UI kit, no external state management library.
 
 ---
 
-## 🙌 Vision
+## Development
 
-> Most data tools clutter the screen with **AI summaries, “smart insights,”** and pretend-intelligence features. Lumen does the opposite: every chart on screen is **a direct, honest read of the data**. No decoration, no hidden model, no surprises.
+```bash
+npm run dev        # Vite dev server with HMR
+npm run typecheck  # TypeScript type-checking (no emit)
+npm run build      # Production build → dist/
+npm run serve      # Preview production build on http://localhost:4173
+```
+
+---
+
+## License
+
+[MIT](./LICENSE) — Copyright (c) 2026 Jeremy.
+
+See the [LICENSE](./LICENSE) file for full terms.
