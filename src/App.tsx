@@ -5,8 +5,10 @@ import { ChartsPanel } from './components/ChartsPanel';
 import { StatsCards } from './components/StatsCards';
 import { DataPreview } from './components/DataPreview';
 import { ExportMenu } from './components/ExportMenu';
+import { ThemePicker } from './components/ThemePicker';
 import { parseFile, formatBytes, type ParsedFile } from './utils/fileParser';
 import { analyzeColumns } from './utils/columnAnalyzer';
+import { useTheme } from './utils/useTheme';
 
 interface Toast {
   msg: string;
@@ -18,6 +20,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
+  const { theme } = useTheme();
 
   const onFile = useCallback(async (file: File) => {
     setBusy(true);
@@ -63,6 +66,7 @@ export default function App() {
           lumen
           {parsed && <span className="brand-sub"> · {parsed.fileName}</span>}
         </div>          <div className="topbar-actions">
+            <ThemePicker />
             {parsed && (
               <ExportMenu
                 fileName={parsed.fileName}
@@ -96,6 +100,7 @@ export default function App() {
           <main className="main">
             <StatsCards columns={columnStats} totalRows={parsed.rows.length} />
             <ChartsPanel
+              key={`${theme.themeId}:${theme.accent ?? ''}`}
               rows={parsed.rows}
               columns={columnStats}
               selected={selected}

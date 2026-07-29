@@ -21,6 +21,62 @@
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
 }
 
+/* ==========================================================
+   Theme overrides — each preset swaps the surface palette.
+   The user also flips the active theme from the topbar ThemePicker.
+   Custom themes only override --accent (set by JS via inline style).
+   ========================================================== */
+
+:root[data-theme="graphite"] {
+  --bg: #0c0c0d;
+  --bg-elev: #131316;
+  --bg-hover: #1a1a20;
+  --border: #2a2a30;
+  --border-strong: #444450;
+  --text: #d8dae0;
+  --text-soft: #a1a4ad;
+  --text-mute: #6b6e78;
+  --accent: #9ca3af;
+  --good: #84cc16;
+  --warn: #facc15;
+  --bad: #ef4444;
+}
+
+:root[data-theme="paper"] {
+  --bg: #f7f7f5;
+  --bg-elev: #ffffff;
+  --bg-hover: #ecece8;
+  --border: #d8d8d2;
+  --border-strong: #a8a8a0;
+  --text: #1a1a1a;
+  --text-soft: #4a4a4a;
+  --text-mute: #6e6e6a;
+  --accent: #2563eb;
+  --good: #16a34a;
+  --warn: #d97706;
+  --bad: #dc2626;
+}
+
+:root[data-theme="ember"] {
+  --bg: #0e0a08;
+  --bg-elev: #1a1411;
+  --bg-hover: #221a16;
+  --border: #2f231d;
+  --border-strong: #4a3829;
+  --text: #f1ebe2;
+  --text-soft: #b9aea3;
+  --text-mute: #756b5f;
+  --accent: #fb923c;
+  --good: #84cc16;
+  --warn: #f59e0b;
+  --bad: #ef4444;
+}
+
+:root[data-theme="custom"] {
+  /* --accent is set inline by JS from the picked hue. Everything else
+     falls back to lumen defaults. */
+}
+
 * { box-sizing: border-box; }
 
 html, body, #root { margin: 0; padding: 0; height: 100%; width: 100%; }
@@ -140,7 +196,7 @@ body {
   color: var(--accent);
 }
 .btn-primary:hover {
-  background: rgba(96, 165, 250, 0.08);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
   border-color: var(--accent);
 }
 
@@ -168,7 +224,7 @@ body {
 
 .dropzone.is-dragging {
   border-color: var(--accent);
-  background: rgba(96, 165, 250, 0.04);
+  background: color-mix(in srgb, var(--accent) 4%, transparent);
 }
 
 .dropzone h1 {
@@ -496,4 +552,127 @@ table.data-table {
 .toast-error {
   border-color: var(--bad);
   color: var(--bad);
+}
+
+/* ==========================================================
+   Theme picker (topbar popover)
+   ========================================================== */
+
+.theme-picker {
+  position: relative;
+}
+
+.theme-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  font-size: 12px;
+  font-family: var(--mono);
+}
+.theme-trigger-label {
+  color: var(--text-soft);
+  text-transform: lowercase;
+}
+.theme-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--dot-color, var(--accent));
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.theme-pop {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px 12px;
+  min-width: 240px;
+  z-index: 50;
+}
+
+.theme-pop-head {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-mute);
+  margin-bottom: 8px;
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.theme-tile {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 8px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text);
+}
+.theme-tile:hover {
+  border-color: var(--border-strong);
+}
+.theme-tile.is-active {
+  border-color: var(--accent);
+}
+.tile-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  height: 14px;
+}
+.tile-cell {
+  background: var(--cell-color, var(--bg-hover));
+  border-radius: 1px;
+  display: block;
+}
+.tile-name {
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--text);
+}
+
+.theme-custom {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+.theme-custom-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.theme-custom-input {
+  width: 32px;
+  height: 24px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  border-radius: var(--radius);
+}
+.theme-custom-hex {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-soft);
+}
+.theme-pop-foot {
+  font-size: 10px;
+  color: var(--text-mute);
+  margin: 8px 0 0;
 }

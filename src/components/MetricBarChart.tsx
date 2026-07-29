@@ -1,6 +1,8 @@
 import { Bar } from 'react-chartjs-2';
 import type { ChartData, ChartOptions } from 'chart.js';
-import { baseChartOptions, chartColors } from '../lib/chartSetup';
+import { getBaseChartOptions } from '../lib/chartSetup';
+import { getThemeContext } from '../utils/themes';
+import { useTheme } from '../utils/useTheme';
 
 interface MetricBarChartProps {
   labels: string[];
@@ -9,13 +11,15 @@ interface MetricBarChartProps {
 }
 
 export function MetricBarChart({ labels, values, label }: MetricBarChartProps) {
+  const { theme } = useTheme();
+  const { palette, surface } = getThemeContext(theme);
   const data: ChartData<'bar'> = {
     labels,
     datasets: [
       {
         label,
         data: values,
-        backgroundColor: chartColors.palette[0],
+        backgroundColor: palette[0],
         borderRadius: 6,
         borderSkipped: false,
         maxBarThickness: 36,
@@ -23,12 +27,10 @@ export function MetricBarChart({ labels, values, label }: MetricBarChartProps) {
     ],
   };
 
+  const base = getBaseChartOptions(surface);
   const options = {
-    ...baseChartOptions,
-    plugins: {
-      ...baseChartOptions.plugins,
-      legend: { display: false },
-    },
+    ...base,
+    plugins: { ...base.plugins, legend: { display: false } },
   };
 
   return <Bar data={data} options={options as ChartOptions<'bar'>} />;

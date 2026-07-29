@@ -1,6 +1,8 @@
 import { Bar } from 'react-chartjs-2';
 import type { ChartData, ChartOptions } from 'chart.js';
-import { baseChartOptions, chartColors } from '../lib/chartSetup';
+import { getBaseChartOptions } from '../lib/chartSetup';
+import { getThemeContext } from '../utils/themes';
+import { useTheme } from '../utils/useTheme';
 
 interface HistogramChartProps {
   values: number[];
@@ -9,6 +11,8 @@ interface HistogramChartProps {
 }
 
 export function HistogramChart({ values, binCount = 10, label }: HistogramChartProps) {
+  const { theme } = useTheme();
+  const { palette, surface } = getThemeContext(theme);
   const { labels, counts } = bin(values, binCount);
   const data: ChartData<'bar'> = {
     labels,
@@ -16,7 +20,7 @@ export function HistogramChart({ values, binCount = 10, label }: HistogramChartP
       {
         label,
         data: counts,
-        backgroundColor: chartColors.palette[0],
+        backgroundColor: palette[0],
         borderRadius: 4,
         borderSkipped: false,
         maxBarThickness: 50,
@@ -25,12 +29,10 @@ export function HistogramChart({ values, binCount = 10, label }: HistogramChartP
       },
     ],
   };
+  const base = getBaseChartOptions(surface);
   const options = {
-    ...baseChartOptions,
-    plugins: {
-      ...baseChartOptions.plugins,
-      legend: { display: false },
-    },
+    ...base,
+    plugins: { ...base.plugins, legend: { display: false } },
   };
   return <Bar data={data} options={options as ChartOptions<'bar'>} />;
 }
