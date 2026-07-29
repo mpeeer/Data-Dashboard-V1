@@ -3,254 +3,205 @@
 </p>
 
 <h1 align="center">Lumen</h1>
-<p align="center"><strong>Minimal Data Dashboard</strong></p>
+<p align="center">Your data, instantly.</p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" /></a>
-  <a href="#quick-start"><img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen" alt="Node >= 18" /></a>
-  <a href="#technology-stack"><img src="https://img.shields.io/badge/React-18-61dafb?logo=react" alt="React 18" /></a>
-  <a href="#technology-stack"><img src="https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript" alt="TypeScript 5" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" /></a>
+  <a href="#quick-start"><img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen" /></a>
+  <a href="#technology-stack"><img src="https://img.shields.io/badge/React-18-61dafb?logo=react" /></a>
+  <a href="#technology-stack"><img src="https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript" /></a>
 </p>
 
 <p align="center">
   <video src="demo.mp4" width="800" autoplay muted loop playsinline controls>
-    <img src="public/screenshot.png" alt="Lumen dashboard screenshot" width="800" />
+    <img src="public/screenshot.png" alt="Lumen dashboard" width="800" />
   </video>
 </p>
 
 ---
 
-**Lumen** is a zero-config, client-side data exploration tool. Drop a CSV, TSV, TXT, or JSON file and get structured visualizations, column-level statistics, search, and theming — all rendered locally in the browser. No servers, no accounts, no data leaves your machine.
+Lumen is a data exploration tool that runs entirely in your browser. Drop in a file. Charts, statistics, search — all rendered locally. Nothing leaves your machine.
 
 ---
 
-## ✨ Features
+## What it does
 
-### 📂 Data Input
-- **Drag-and-drop** or **file browse** for `.csv`, `.tsv`, `.txt`, and `.json` files
-- **Folder mode** — select a directory to browse and switch between multiple data files without re-uploading
-- **Recent folders** — localStorage remembers your last 5 folders with file counts and total size
-- Automatic delimiter detection via [PapaParse](https://www.papaparse.com)
-- 50 MB file size cap — all parsing runs locally
+**Open any data file.** CSV, TSV, TXT, or JSON. Lumen detects the structure and builds a dashboard around it. No configuration. No setup.
 
-### 📊 Smart Column Analysis
-Each column is inspected and classified as **numeric**, **date**, or **text** using a configurable 70% threshold. Per-column statistics include:
+**Or open a folder.** Browse every compatible file in a directory. Switch between them instantly. Lumen remembers your recent folders.
 
-| Numeric | Date | Text |
-|---|---|---|
-| Mean, median, stdev | Earliest / latest dates | Unique count |
-| Min / max / range | Day span | Top-N category frequency |
-| Null count | Null count | Null count |
+**See everything at a glance.** Every column is classified and profiled — numeric distributions, date ranges, category frequencies, null counts. Charts render automatically based on what the data actually contains.
 
-### 📈 Auto-Generated Charts
-The dashboard renders up to 5 histograms, 3 category breakdowns, 1 time-series line, 1 aggregation bar, and 1 doughnut:
+**Search across everything.** Type a value and Lumen scans every column, every row. Results appear instantly. Matches highlight in the data table. Navigate with arrow keys, close with Escape.
 
-- **Histogram** — 10-bin numeric distribution
-- **Category Bar** — horizontal top-N breakdown
-- **Time-Series Line** — date × numeric trend
-- **Metric Bar** — mean grouped by category
-- **Doughnut** — proportional share
-
-All charts use the active theme's 6-color palette and update instantly on theme change.
-
-### 🔍 Interactive Exploration
-- **Column sidebar** — every column listed with type badge, unique count, mean, range
-- **Focus mode** — click any column to filter all charts and stats
-- **Dataset search** — search every value in every column with instant results, keyboard navigation, and highlighted matches in the data table
-- **Fullscreen charts** — click ↗ to expand any chart with scroll-to-zoom and drag-to-pan via `chartjs-plugin-zoom`
-- **Scrollable data table** — first 50 rows with search match highlighting
-
-### 🎨 Theming
-Six theme options with smooth 0.3s CSS transitions:
-
-| Theme | Shortcut | Style |
-|---|---|---|
-| Midnight *(default)* | `Ctrl+1` | Dark blue / green / amber |
-| Graphite | `Ctrl+2` | Muted grayscale |
-| Paper | `Ctrl+3` | Light & crisp |
-| Ember | `Ctrl+4` | Warm orange / red / yellow |
-| Auto | `Ctrl+0` | Follows OS preference |
-| Custom | — | Pick any accent color; full surface derived from luminance |
-
-Theme preference persists in `localStorage`. Custom themes auto-derive light/dark surfaces.
-
-### 📱 Progressive Web App
-Installable on desktop and mobile home screens. Works offline via service worker caching.
+**Make it yours.** Six themes. Keyboard shortcuts. Fullscreen charts with scroll-to-zoom. Install it as a desktop app.
 
 ---
 
-## 🚀 Quick Start
+## Charts
 
-**Prerequisites:** Node.js 18 or later.
+Lumen selects the right visualization for each column automatically.
+
+| Data type | Visualization |
+|---|---|
+| Numeric | Histogram with 10 equal-width bins |
+| Text (categorical) | Horizontal bar chart of top values |
+| Date &middot; Numeric | Time-series line chart |
+| Category &middot; Numeric | Vertical bar of averages |
+| Top text column | Proportional doughnut |
+
+Charts use the active theme's color palette and update immediately when you switch themes.
+
+---
+
+## Themes
+
+Six looks. Instant switching.
+
+| Theme | Shortcut | Appearance |
+|---|---|---|
+| Midnight | `Ctrl+1` | Dark, cool blue accents |
+| Graphite | `Ctrl+2` | Restrained grayscale |
+| Paper | `Ctrl+3` | Full light mode |
+| Ember | `Ctrl+4` | Warm amber and orange |
+| Auto | `Ctrl+0` | Matches your system setting |
+| Custom | — | Pick any accent color; Lumen builds the rest |
+
+Smooth 0.3s transitions. Preference saved locally.
+
+---
+
+## Quick Start
+
+Requires Node.js 18 or later.
 
 ```bash
-# Install dependencies
 npm install
-
-# Start dev server (hot reload on http://localhost:5173)
 npm run dev
-
-# Open the app and drop sample-data.csv, or browse any supported file
 ```
 
-Production build:
+Open `http://localhost:5173`. Drop `sample-data.csv` onto the window, or browse any supported file.
 
 ```bash
 npm run build
-npm run preview   # serves dist/ on http://localhost:4173
+npm run preview    # production build at http://localhost:4173
 ```
 
 ---
 
-## 📋 Supported Formats
+## File formats
 
-| Extension | Description |
+| Format | Notes |
 |---|---|
 | `.csv` | Comma-separated values |
 | `.tsv` | Tab-separated values |
-| `.txt` | Any delimited text (auto-detected) |
+| `.txt` | Delimiter auto-detected |
 | `.json` | Array of objects, or `{ "rows" \| "data": […] }` |
 
-A **`sample-data.csv`** is included (60 rows of fictional Q1–Q2 product sales) for immediate testing.
+`sample-data.csv` is included for immediate testing — 60 rows of fictional sales data.
 
 ---
 
-## 🏗 Architecture
-
-### Chart Selection
-Columns are evaluated in a single pass:
-
-1. **Numeric** → histogram (up to 5)
-2. **String** → horizontal category bar + doughnut on highest-cardinality column (up to 3 bars)
-3. **Date + Numeric** → time-series line
-4. **String + Numeric** → vertical bar of mean values by category
-
-Clicking a column in the sidebar enters **Focus Mode**, filtering all charts to that column's data.
-
-### Folder Workflow
-```
-Select folder → File browser (with preview stats) → Click file → Dashboard
-                                                      ← Folder         ↲
-                                                      × Clear → Empty
-```
-
-Each file in the folder browser shows a live preview (column count, row count) parsed via a lightweight O(n) string scanner — no Papa Parse overhead.
-
----
-
-## 📁 Project Structure
+## Architecture
 
 ```
 src/
-├── App.tsx                    # Shell, state, folder/recent-folder logic
-├── main.tsx                   # React entry point
+├── App.tsx                    # Application shell and state
+├── main.tsx                   # Entry point
 ├── lib/
-│   └── chartSetup.ts          # Chart.js registration, defaults, zoom plugin
+│   └── chartSetup.ts          # Chart.js configuration and zoom
 ├── utils/
-│   ├── fileParser.ts          # CSV / TSV / TXT / JSON parsing + preview
-│   ├── columnAnalyzer.ts      # Column type inference and statistics
-│   ├── themes.ts              # Theme definitions, palettes, surface derivation
-│   └── useTheme.tsx           # Theme context, provider, persistence
+│   ├── fileParser.ts          # File parsing and lightweight preview
+│   ├── columnAnalyzer.ts      # Type inference and statistics
+│   ├── themes.ts              # Theme definitions and palette generation
+│   └── useTheme.tsx           # Theme context and persistence
 ├── components/
-│   ├── FileUpload.tsx         # Drag-and-drop + folder picker
-│   ├── FolderView.tsx         # Folder file browser with preview stats
-│   ├── DataOutline.tsx        # Column list sidebar
-│   ├── StatsCards.tsx         # Summary statistics row
-│   ├── ChartsPanel.tsx        # Chart orchestration + fullscreen overlay
+│   ├── FileUpload.tsx         # Drag-and-drop and folder selection
+│   ├── FolderView.tsx         # Directory file browser with previews
+│   ├── DataOutline.tsx        # Column sidebar
+│   ├── StatsCards.tsx         # Summary statistics
+│   ├── ChartsPanel.tsx        # Chart grid and fullscreen overlay
 │   ├── HistogramChart.tsx     # Numeric distribution
-│   ├── CategoryBarChart.tsx   # Horizontal category breakdown
-│   ├── MetricBarChart.tsx     # Vertical aggregation bar
-│   ├── MetricLineChart.tsx    # Time-series line
-│   ├── MetricDoughnut.tsx     # Category share doughnut
+│   ├── CategoryBarChart.tsx   # Categorical breakdown
+│   ├── MetricBarChart.tsx     # Aggregated bar chart
+│   ├── MetricLineChart.tsx    # Time-series line chart
+│   ├── MetricDoughnut.tsx     # Proportional doughnut
 │   ├── DataPreview.tsx        # Data table with search highlighting
-│   ├── SearchBar.tsx          # Topbar search with dropdown
+│   ├── SearchBar.tsx          # Global search with dropdown
 │   └── ThemePicker.tsx        # Theme selection popover
 └── styles/
-    └── glass.css              # Theme system + compact dashboard layout
+    └── glass.css              # Design system and layout
 
 public/
-├── icon.svg                   # Brand mark, favicon, PWA icon
-├── screenshot.png             # Dashboard screenshot
-└── demo.mp4                   # Feature demo video
+├── icon.svg                   # Brand mark and favicon
+└── screenshot.png             # Dashboard capture
 
 scripts/
-├── screenshot.mjs             # Puppeteer screenshot capture
-└── record-demo.mjs            # Puppeteer + ffmpeg demo video
-
-.github/workflows/
-└── deploy.yml                 # GitHub Pages auto-deploy
+├── screenshot.mjs             # Automated screenshot capture
+└── record-demo.mjs            # Demo video recording
 ```
 
 ---
 
-## 🔧 Technology Stack
+## Built with
 
-| Layer | Library |
+| | |
 |---|---|
 | Build | [Vite 5](https://vitejs.dev) |
-| UI | [React 18](https://react.dev) + [TypeScript 5](https://www.typescriptlang.org/) |
+| Framework | [React 18](https://react.dev) with [TypeScript 5](https://www.typescriptlang.org/) |
 | Charts | [Chart.js 4](https://www.chartjs.org) via [react-chartjs-2](https://react-chartjs-2.js.org/) |
 | Zoom | [chartjs-plugin-zoom](https://www.chartjs.org/chartjs-plugin-zoom/) |
 | Parsing | [PapaParse 5](https://www.papaparse.com) |
-| Upload | [react-dropzone 14](https://react-dropzone.js.org) |
+| File input | [react-dropzone 14](https://react-dropzone.js.org) |
 | PWA | [vite-plugin-pwa](https://vite-pwa-org.netlify.app) |
-| Styling | Custom CSS custom properties — zero framework dependency |
-
-No CSS framework, no UI kit, no external state management.
+| Styling | Custom properties. No framework. |
 
 ---
 
-## 🚢 Deployment
+## Deploy
 
 ### GitHub Pages
 
-Includes a `.github/workflows/deploy.yml` workflow and `.nojekyll` marker.
+Push to `main`. The included workflow builds the app and docs site together:
 
-1. Go to **Settings → Pages** → set source to **GitHub Actions**
-2. Push to `main`
+- **App** → `https://<owner>.github.io/<repo>/`
+- **Docs** → `https://<owner>.github.io/<repo>/docs/`
 
-Deploys to `https://<owner>.github.io/<repo-name>/`. Vite uses `base: './'` for relative asset paths.
+Setup: **Settings → Pages** → source: **GitHub Actions**.
 
-### PWA (Desktop App)
+### Install as a desktop app
 
-After deploying or running `npm run preview`:
-1. Open in Chrome or Edge
-2. Click the install icon in the address bar
-3. Launch from Start Menu / Dock / Applications
+Open the deployed URL in Chrome or Edge. Click the install icon in the address bar. The app runs standalone with offline support via service worker.
 
-### Native Binary (Tauri)
+### Native binary (Tauri)
 
-For a lightweight native executable using the system WebView:
-
-> **Prerequisites:** [Rust](https://rustup.rs) and [Tauri platform dependencies](https://tauri.app/start/prerequisites/)
+Requires [Rust](https://rustup.rs) and [Tauri prerequisites](https://tauri.app/start/prerequisites/).
 
 ```bash
 npm install --save-dev @tauri-apps/cli@latest
 npx tauri init
-# Follow prompts (dev: npm run dev, build: npm run build, dist: ../dist)
 npm run tauri build
 ```
 
 ---
 
-## 🛠 Development
+## Development
 
 ```bash
-npm run dev         # Vite dev server with HMR
-npm run build       # Production build → dist/
-npm run preview     # Preview build on http://localhost:4173
-npx tsc -b --noEmit # TypeScript type-check
+npm run dev          # Dev server with hot reload
+npm run build        # Production build
+npm run preview      # Preview production build
+npx tsc -b --noEmit  # Type check
+
+npm run docs:dev     # Docs dev server at http://localhost:5173
+npm run docs:build   # Build docs to docs/.vitepress/dist
+npm run docs:preview # Preview built docs
 ```
 
-Scripts:
-
-```bash
-node scripts/screenshot.mjs   # Capture dashboard screenshot
-node scripts/record-demo.mjs  # Record feature demo video (requires dev server running)
-```
+Documentation is built with [VitePress](https://vitepress.dev).
 
 ---
 
-## 📄 License
+## License
 
-[MIT](LICENSE) — Copyright (c) 2026 Jeremy.
+[MIT](LICENSE) &copy; 2026 Jeremy

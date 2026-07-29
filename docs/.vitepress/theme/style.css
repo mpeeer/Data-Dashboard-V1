@@ -1,0 +1,190 @@
+/* ==========================================================
+   Lumen docs theme — matches the dashboard aesthetic.
+   Dark surface, blue accent, system fonts, clean spacing.
+   ========================================================== */
+
+:root {
+  --vp-c-bg: #0a0a0a;
+  --vp-c-bg-alt: #0a0a0a;
+  --vp-c-bg-elv: #111111;
+  --vp-c-bg-soft: #111111;
+  --vp-c-bg-mute: #171717;
+
+  --vp-c-border: #262626;
+  --vp-c-border-hard: #404040;
+  --vp-c-divider: #262626;
+  --vp-c-gutter: #262626;
+
+  --vp-c-text-1: #ededed;
+  --vp-c-text-2: #a3a3a3;
+  --vp-c-text-3: #737373;
+
+  --vp-c-brand-1: #60a5fa;
+  --vp-c-brand-2: #3b82f6;
+  --vp-c-brand-3: #2563eb;
+  --vp-c-brand-soft: rgba(96, 165, 250, 0.14);
+
+  --vp-c-green-1: #34d399;
+  --vp-c-green-2: #10b981;
+  --vp-c-green-3: #059669;
+  --vp-c-green-soft: rgba(52, 211, 153, 0.14);
+
+  --vp-c-yellow-1: #fbbf24;
+  --vp-c-yellow-2: #f59e0b;
+  --vp-c-yellow-3: #d97706;
+  --vp-c-yellow-soft: rgba(251, 191, 36, 0.14);
+
+  --vp-c-red-1: #f87171;
+  --vp-c-red-2: #ef4444;
+  --vp-c-red-3: #dc2626;
+  --vp-c-red-soft: rgba(248, 113, 113, 0.14);
+
+  --vp-font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
+  --vp-font-family-mono: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+
+  --vp-code-block-bg: #111111;
+  --vp-code-block-border: #262626;
+  --vp-code-line-highlight-color: rgba(96, 165, 250, 0.08);
+  --vp-code-tab-divider: #262626;
+
+  --vp-custom-block-tip-bg: rgba(96, 165, 250, 0.06);
+  --vp-custom-block-tip-border: rgba(96, 165, 250, 0.3);
+  --vp-custom-block-warning-bg: rgba(251, 191, 36, 0.06);
+  --vp-custom-block-warning-border: rgba(251, 191, 36, 0.3);
+  --vp-custom-block-danger-bg: rgba(248, 113, 113, 0.06);
+  --vp-custom-block-danger-border: rgba(248, 113, 113, 0.3);
+
+  --vp-nav-bg-color: #0a0a0a;
+  --vp-nav-screen-bg-color: #0a0a0a;
+
+  --vp-sidebar-bg-color: #0a0a0a;
+
+  --vp-button-brand-bg: #60a5fa;
+  --vp-button-brand-text: #0a0a0a;
+  --vp-button-brand-hover-bg: #3b82f6;
+  --vp-button-alt-bg: #171717;
+  --vp-button-alt-text: #ededed;
+  --vp-button-alt-hover-bg: #262626;
+  --vp-button-alt-border: #404040;
+
+  --vp-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --vp-shadow-2: 0 3px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Typography refinements ─────────────────────────────────────── */
+
+.VPNavBarTitle .title {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ── Code blocks ─────────────────────────────────────────────────── */
+
+.vp-code-group .tabs label {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.8em;
+}
+
+div[class*="language-"] {
+  border-radius: var(--vp-radius);
+  border: 1px solid var(--vp-c-border);
+}
+
+/* ── Tables ──────────────────────────────────────────────────────── */
+
+.vp-doc table {
+  border-collapse: collapse;
+  border: 1px solid var(--vp-c-border);
+  border-radius: var(--vp-radius);
+  overflow: hidden;
+}
+
+.vp-doc th {
+  background: var(--vp-c-bg-mute);
+  font-weight: 600;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--vp-c-text-2);
+}
+
+.vp-doc tr:nth-child(2n) {
+  background: var(--vp-c-bg-soft);
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────── */
+
+.VPSidebar {
+  border-right: 1px solid var(--vp-c-border);
+}
+
+/* ── Home hero ───────────────────────────────────────────────────── */
+
+.VPHero .name {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.VPHero .text {
+  font-weight: 400;
+  color: var(--vp-c-text-2);
+}
+
+.VPHero .tagline {
+  color: var(--vp-c-text-3);
+}
+
+/* ── Feature cards ───────────────────────────────────────────────── */
+
+.VPFeature {
+  border: 1px solid var(--vp-c-border);
+  border-radius: var(--vp-radius);
+  background: var(--vp-c-bg-soft);
+  transition: border-color 0.15s ease;
+}
+
+.VPFeature:hover {
+  border-color: var(--vp-c-border-hard);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+
+.VPFooter {
+  border-top: 1px solid var(--vp-c-border);
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--vp-c-border-hard);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--vp-c-text-3);
+}
+
+/* ── Doc images ──────────────────────────────────────────────────── */
+
+.vp-doc img {
+  border: 1px solid var(--vp-c-border);
+  border-radius: var(--vp-radius);
+}
+
+.vp-doc video {
+  border: 1px solid var(--vp-c-border);
+  border-radius: 4px;
+  width: 100%;
+  max-width: 800px;
+  display: block;
+  margin: 32px auto;
+}
