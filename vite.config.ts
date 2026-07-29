@@ -44,6 +44,11 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,woff2}'],
         cleanupOutdatedCaches: true,
         navigateFallback: 'index.html',
+        // Without this, the SW applies the index.html fallback to every
+        // navigation request — including the `blob:` URL our PDF export uses.
+        // That silently swallows the download in Chromium (no file is saved,
+        // the click looks like a no-op). Exclude blob: URLs from the fallback.
+        navigateFallbackDenylist: [/^blob:/],
       },
     }),
   ],

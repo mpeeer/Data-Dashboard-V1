@@ -38,10 +38,6 @@ const LIGHT_THEME = {
   palette: ['#2563eb', '#16a34a', '#f59e0b', '#dc2626', '#7c3aed', '#0d9488', '#db2777', '#64748b'],
 };
 
-interface OffscreenChartHandle {
-  destroy: () => void;
-}
-
 async function mountChart(cfg: ChartConfiguration): Promise<HTMLCanvasElement> {
   // Mount a hidden canvas, draw the chart, then return it.
   const host = document.createElement('div');
@@ -65,10 +61,6 @@ async function mountChart(cfg: ChartConfiguration): Promise<HTMLCanvasElement> {
   );
 
   return canvas;
-}
-
-function tearDown(canvas: HTMLCanvasElement): void {
-  canvas.parentElement?.parentElement?.remove();
 }
 
 function lightBaseOptions(fontFamily = 'system-ui, -apple-system, sans-serif') {
@@ -137,10 +129,10 @@ async function renderOnce(builder: () => ChartConfiguration): Promise<string> {
   const cfg = builder();
   const canvas = await mountChart(cfg);
   const url = canvas.toDataURL('image/png');
-  tearDown(canvas);
-  // Destroy the underlying Chart instance so canvases don't pile up with hot listeners.
-  const chart = (ChartJS.getChart as (c: HTMLCanvasElement) => OffscreenChartHandle | null)(canvas);
-  chart?.destroy();
+  // Destroy chart.js listeners first (it owns resize/animation internals).
+  ChartJS.getChart(canvas)?.destroy();
+  // Then remove only the host div — never the document body.
+  canvas.parentElement?.remove();
   return url;
 }
 

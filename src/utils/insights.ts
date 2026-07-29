@@ -101,9 +101,7 @@ export function generateInsights(stats: ColumnStats[], rows: Row[]): Insight[] {
     out.push({
       title: c.name,
       body:
-        `${c.nonNull.toLocaleString()} values${nullPart}. ` +
-        `Range ${fmt(n.min)}–${fmt(n.max)}. ` +
-        `Mean ${fmt(n.mean)} (median ${fmt(n.median)}, σ ${fmt(n.stdev)}).`,
+        `${c.nonNull.toLocaleString()} values${nullPart}. ` +          `Range ${fmt(n.min)}-${fmt(n.max)}. ` +          `Mean ${fmt(n.mean)} (median ${fmt(n.median)}, stdev ${fmt(n.stdev)}).`,
     });
   }
 
@@ -126,7 +124,7 @@ export function generateInsights(stats: ColumnStats[], rows: Row[]): Insight[] {
     if (!c.date) continue;
     out.push({
       title: c.name,
-      body: `${c.nonNull.toLocaleString()} dates, ${c.date.min.toISOString().slice(0, 10)} → ${c.date.max.toISOString().slice(0, 10)} (${c.date.spanDays.toLocaleString()} day span).`,
+      body: `${c.nonNull.toLocaleString()} dates, ${c.date.min.toISOString().slice(0, 10)} to ${c.date.max.toISOString().slice(0, 10)} (${c.date.spanDays.toLocaleString()} day span).`,
     });
   }
 
@@ -156,13 +154,13 @@ export function generateInsights(stats: ColumnStats[], rows: Row[]): Insight[] {
     const t = detectTrend(rows, dateStat.name, numStat.name);
     if (t) {
       const pct = t.first === 0 ? null : ((t.last - t.first) / Math.abs(t.first)) * 100;
-      const arrow = pct === null ? '' : t.last > t.first ? '↑' : t.last < t.first ? '↓' : '→';
+      const sign = pct === null ? '' : t.last > t.first ? '+' : t.last < t.first ? '-' : '=';
       out.push({
         title: `${numStat.name} over ${dateStat.name}`,
         body:
           pct === null
             ? `${numStat.name} averages ${fmt(t.mean)} from ${t.dates[0]} to ${t.dates[1]}.`
-            : `${numStat.name} moves from ${fmt(t.first)} to ${fmt(t.last)} (${arrow} ${Math.abs(pct).toFixed(0)}%) over ${t.dates[0]}–${t.dates[1]}.`,
+            : `${numStat.name} moves from ${fmt(t.first)} to ${fmt(t.last)} (${sign}${Math.abs(pct).toFixed(0)}%) over ${t.dates[0]}-${t.dates[1]}.`,
       });
     }
   }

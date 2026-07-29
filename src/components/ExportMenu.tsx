@@ -21,11 +21,18 @@ const downloadBytes = (bytes: Uint8Array, fileName: string) => {
   const a = document.createElement('a');
   a.href = url;
   a.download = fileName;
+  a.rel = 'noopener';
+  a.style.display = 'none';
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
-  // Allow the click to fire before revoking.
-  setTimeout(() => URL.revokeObjectURL(url), 0);
+  // Keep the anchor and blob URL alive long enough for the browser's download
+  // manager to start the fetch. Revoking too eagerly can silently cancel the
+  // download in Chromium (especially while the PWA service worker is active —
+  // see vite.config.ts → workbox.navigateFallbackDenylist).
+  window.setTimeout(() => {
+    a.remove();
+    URL.revokeObjectURL(url);
+  }, 60_000);
 };
 
 export function ExportMenu({ fileName, rows, columns, selected }: ExportMenuProps) {
