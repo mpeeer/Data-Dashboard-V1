@@ -4,6 +4,7 @@ import { DataOutline } from './components/DataOutline';
 import { ChartsPanel } from './components/ChartsPanel';
 import { StatsCards } from './components/StatsCards';
 import { DataPreview } from './components/DataPreview';
+import { ExportMenu } from './components/ExportMenu';
 import { parseFile, formatBytes, type ParsedFile } from './utils/fileParser';
 import { analyzeColumns } from './utils/columnAnalyzer';
 
@@ -61,18 +62,25 @@ export default function App() {
         <div className="brand">
           lumen
           {parsed && <span className="brand-sub"> · {parsed.fileName}</span>}
-        </div>
-        <div className="topbar-actions">
-          {parsed && (
-            <span className="file-chip">
-              {formatBytes(parsed.fileSize)}
-              <button type="button" aria-label="Clear" onClick={onReset}>
-                ×
-              </button>
-            </span>
-          )}
-          {parsed && <UploadButton onFile={onFile} busy={busy} />}
-        </div>
+        </div>          <div className="topbar-actions">
+            {parsed && (
+              <ExportMenu
+                fileName={parsed.fileName}
+                rows={parsed.rows}
+                columns={columnStats}
+                selected={selected}
+              />
+            )}
+            {parsed && (
+              <span className="file-chip">
+                {formatBytes(parsed.fileSize)}
+                <button type="button" aria-label="Clear" onClick={onReset}>
+                  ×
+                </button>
+              </span>
+            )}
+            {parsed && <UploadButton onFile={onFile} busy={busy} />}
+          </div>
       </header>
 
       {!loaded && <FileUpload onFile={onFile} busy={busy} />}

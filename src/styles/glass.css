@@ -83,6 +83,20 @@ body {
   gap: 10px;
 }
 
+.export-menu {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.export-menu .btn {
+  padding: 4px 9px;
+  font-size: 12px;
+}
+.export-menu .btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .file-chip {
   font-size: 12px;
   color: var(--text-mute);
