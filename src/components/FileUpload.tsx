@@ -59,21 +59,23 @@ export function FileUpload({ onFile, onFolder, busy, children }: FileUploadProps
           <button type="button" className="btn btn-primary" onClick={open}>
             {busy ? 'Loading\u2026' : 'Choose file\u2026'}
           </button>
-          <button
-            type="button"
-            className="btn"
-            onClick={() => folderRef.current?.click()}
-          >
-            Select folder
-          </button>
-          <input
-            ref={folderRef}
-            type="file"
-            {...{ webkitdirectory: '', directory: '' } as React.InputHTMLAttributes<HTMLInputElement>}
-            className="file-input-hidden"
-            onChange={onFolderChange}
-            aria-label="Select folder"
-          />
+          <span className="folder-picker-wrap">
+            <button
+              type="button"
+              className="btn"
+              onClick={() => folderRef.current?.click()}
+            >
+              Select folder
+            </button>
+            <input
+              ref={folderRef}
+              type="file"
+              {...{ webkitdirectory: '', directory: '' } as React.InputHTMLAttributes<HTMLInputElement>}
+              className="file-input-hidden"
+              onChange={onFolderChange}
+              aria-label="Select folder"
+            />
+          </span>
         </div>
 
         <div className="hint">.csv  .tsv  .txt  .json  ·  max 50 MB  ·  or select a folder</div>

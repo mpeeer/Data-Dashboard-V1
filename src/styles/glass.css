@@ -962,6 +962,11 @@ table.data-table {
   cursor: pointer;
 }
 
+.folder-picker-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
 /* ==========================================================
    Search match highlighting (DataPreview table)
    ========================================================== */
