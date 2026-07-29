@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <video src="demo.mp4" width="800" autoplay muted loop playsinline controls>
+  <video src="public/demo.mp4" width="800" autoplay muted loop playsinline controls>
     <img src="public/screenshot.png" alt="Lumen dashboard" width="800" />
   </video>
 </p>
@@ -166,12 +166,10 @@ scripts/
 
 ### GitHub Pages
 
-Push to `main`. The included workflow builds the app and docs site together:
+1. Repository **Settings → Pages** → source: **GitHub Actions**
+2. Push to `main`
 
-- **App** → `https://<owner>.github.io/<repo>/`
-- **Docs** → `https://<owner>.github.io/<repo>/docs/`
-
-Setup: **Settings → Pages** → source: **GitHub Actions**.
+Deploys to `https://<owner>.github.io/<repo>/`.
 
 ### Install as a desktop app
 
@@ -196,13 +194,7 @@ npm run dev          # Dev server with hot reload
 npm run build        # Production build
 npm run preview      # Preview production build
 npx tsc -b --noEmit  # Type check
-
-npm run docs:dev     # Docs dev server at http://localhost:5173
-npm run docs:build   # Build docs to docs/.vitepress/dist
-npm run docs:preview # Preview built docs
 ```
-
-Documentation is built with [VitePress](https://vitepress.dev).
 
 ---
 

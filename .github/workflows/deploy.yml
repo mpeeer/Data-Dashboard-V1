@@ -34,14 +34,6 @@ jobs:
       - name: Build app
         run: npm run build
 
-      - name: Build docs
-        run: npm run docs:build
-
-      - name: Merge docs into app build
-        run: |
-          mkdir -p dist/docs
-          cp -r docs/.vitepress/dist/* dist/docs/
-
       - name: Configure Pages
         uses: actions/configure-pages@v4
 
