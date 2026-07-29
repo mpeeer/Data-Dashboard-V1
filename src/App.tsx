@@ -4,11 +4,10 @@ import { DataOutline } from './components/DataOutline';
 import { ChartsPanel } from './components/ChartsPanel';
 import { StatsCards } from './components/StatsCards';
 import { DataPreview } from './components/DataPreview';
-import { ExportMenu } from './components/ExportMenu';
 import { ThemePicker } from './components/ThemePicker';
+import { SearchBar } from './components/SearchBar';
 import { parseFile, formatBytes, type ParsedFile } from './utils/fileParser';
 import { analyzeColumns } from './utils/columnAnalyzer';
-import { useTheme } from './utils/useTheme';
 
 interface Toast {
   msg: string;
@@ -20,7 +19,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
-  const { theme } = useTheme();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const onFile = useCallback(async (file: File) => {
     setBusy(true);
@@ -65,16 +64,17 @@ export default function App() {
         <div className="brand">
           lumen
           {parsed && <span className="brand-sub"> · {parsed.fileName}</span>}
-        </div>          <div className="topbar-actions">
+        </div>
+        {loaded && (
+          <SearchBar
+            rows={parsed.rows}
+            columns={parsed.columns}
+            onSelectColumn={setSelected}
+            onSearch={setSearchQuery}
+          />
+        )}
+        <div className="topbar-actions">
             <ThemePicker />
-            {parsed && (
-              <ExportMenu
-                fileName={parsed.fileName}
-                rows={parsed.rows}
-                columns={columnStats}
-                selected={selected}
-              />
-            )}
             {parsed && (
               <span className="file-chip">
                 {formatBytes(parsed.fileSize)}
@@ -105,7 +105,7 @@ export default function App() {
               selected={selected}
             />
             <section>
-              <DataPreview parsed={parsed} columns={columnStats} />
+              <DataPreview parsed={parsed} columns={columnStats} searchQuery={searchQuery} />
             </section>
           </main>
         </div>

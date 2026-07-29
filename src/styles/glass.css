@@ -104,6 +104,137 @@ body.theme-ready *::after {
 }
 
 /* ==========================================================
+   Search bar (topbar center)
+   ========================================================== */
+
+.search-bar {
+  position: relative;
+  flex: 1;
+  max-width: 420px;
+  margin: 0 16px;
+}
+
+.search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  width: 100%;
+  font: inherit;
+  font-size: 12px;
+  font-family: var(--mono);
+  padding: 5px 28px 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.search-input:focus {
+  border-color: var(--accent);
+}
+
+.search-clear {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-mute);
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+.search-clear:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+.search-input::placeholder {
+  color: var(--text-mute);
+}
+.search-input:focus {
+  border-color: var(--accent);
+}
+
+.search-drop {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  z-index: 50;
+  max-height: 320px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-drop-head {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-mute);
+  padding: 6px 10px 4px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.search-results {
+  overflow-y: auto;
+}
+
+.search-result {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 10px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text);
+  border-left: 3px solid transparent;
+}
+.search-result:hover,
+.search-result.is-active {
+  background: var(--bg-hover);
+  border-left-color: var(--accent);
+}
+
+.search-result-col {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 0;
+  max-width: 140px;
+}
+
+.search-result-val {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ==========================================================
    App skeleton
    ========================================================== */
 
@@ -147,20 +278,6 @@ body.theme-ready *::after {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-.export-menu {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.export-menu .btn {
-  padding: 4px 9px;
-  font-size: 12px;
-}
-.export-menu .btn:disabled {
-  opacity: 0.6;
-  cursor: default;
 }
 
 .file-chip {
@@ -550,6 +667,20 @@ table.data-table {
   inset: 0;
   opacity: 0;
   cursor: pointer;
+}
+
+/* ==========================================================
+   Search match highlighting (DataPreview table)
+   ========================================================== */
+
+td.is-match {
+  background: color-mix(in srgb, var(--warn) 12%, transparent);
+}
+td.is-match mark {
+  background: color-mix(in srgb, var(--warn) 35%, transparent);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
 }
 
 /* ==========================================================
