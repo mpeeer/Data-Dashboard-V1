@@ -1,0 +1,96 @@
+/* ==========================================================
+   Lumen — Tailwind v4 + shadcn/ui globals.
+
+   Two important integration points with src/styles/glass.css:
+
+   1. The :root block below maps shadcn's --background / --primary
+      / --border / etc. tokens onto Lumen's existing CSS variables
+      (--bg, --text, --accent, --border). Theme switching in
+      src/utils/useTheme.tsx flips Lumen's tokens (via the
+      [data-theme=…] selectors in glass.css, or inline for the
+      "custom" accent) — and the shadcn tokens follow automatically
+      through this alias chain.
+
+   2. Tailwind's preflight (reset) runs because this file is imported
+      before glass.css in src/main.tsx. glass.css then layers the
+      Lumen-specific styles on top, so existing components keep
+      rendering identically.
+   ========================================================== */
+
+@import 'tailwindcss';
+
+:root {
+  /* shadcn semantic tokens — aliased onto Lumen's surface tokens so
+     every theme (lumen / graphite / paper / ember / custom / auto)
+     flows through to shadcn components without extra plumbing. */
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--bg-elev);
+  --card-foreground: var(--text);
+  --popover: var(--bg-elev);
+  --popover-foreground: var(--text);
+  --primary: var(--accent);
+  --primary-foreground: var(--bg);
+  --secondary: var(--bg-hover);
+  --secondary-foreground: var(--text);
+  --muted: var(--bg-hover);
+  --muted-foreground: var(--text-mute);
+  /* Note: the Lumen token named --accent holds the brand hue; we map
+     shadcn's --accent onto the subtle-hover surface to avoid
+     colliding with Lumen's --accent. shadcn actions that need the
+     brand hue should use --primary instead. */
+  --accent: var(--bg-hover);
+  --accent-foreground: var(--text);
+  --destructive: var(--bad);
+  --destructive-foreground: var(--text);
+  /* shadcn's --border is intentionally NOT redefined here: glass.css
+     already defines --border per theme (──final fallback for shadcn
+     components), and a :root rule of `--border: var(--border)` would
+     be a guaranteed-invalid self-reference. @theme inline below reads
+     --border from glass.css as-is. */
+  --input: var(--border-strong);
+  --ring: var(--accent);
+
+  /* Tailwind base font / radius — picked up by shadcn components. */
+  --radius: 4px;
+  --font-sans: var(--sans);
+  --font-mono: var(--mono);
+}
+
+/* Expose the shadcn tokens as Tailwind utility colors (bg-background,
+   text-foreground, border-border, etc.). `inline` keeps the values as
+   var() references so they re-evaluate when Lumen's --bg/--text/etc.
+   change at runtime. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+}

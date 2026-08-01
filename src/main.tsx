@@ -2,6 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ThemeProvider } from './utils/useTheme';
+// Tailwind v4 + shadcn vars must be imported BEFORE glass.css so the
+// preflight (reset) runs first and Lumen's component-level styles
+// override Tailwind utilities where appropriate.
+import './index.css';
 import './styles/glass.css';
 
 // Prevent theme-transition flash on initial paint — transitions

@@ -1,5 +1,7 @@
+import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 // `base: './'` produces asset paths relative to the document so the build works
@@ -7,7 +9,17 @@ import { VitePWA } from 'vite-plugin-pwa';
 // Override at build time with `vite build --base=/my-path/`.
 export default defineConfig({
   base: './',
+  resolve: {
+    // Mirrors the `paths` block in tsconfig.app.json so `@/foo`
+    // resolves at build / dev time as well as in the typechecker.
+    // Uses `import.meta.url` because tsconfig says `"type": "module"`
+    // and `__dirname` is not available in ESM.
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
   plugins: [
+    tailwindcss(),
     react(),
     VitePWA({
       registerType: 'autoUpdate',
